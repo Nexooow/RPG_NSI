@@ -1,7 +1,10 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import base64
+import numpy as np
+import pygame
 from io import BytesIO
+
 class Graph:
     def __init__(self,aretes,sommets,orientation):
         self.sommets=sommets
