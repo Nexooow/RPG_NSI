@@ -80,12 +80,12 @@ def paths(graphe,a,b):
     path=list(nx.all_simple_paths(G,a,b,cutoff=None))
     pathway={i:len(path[i]) for i in range(len(path))}
     return path[min(pathway,key=pathway.get)]
-graphe=Graph([("Auberge","B"),("B","Ceilidh"),("B","Auberge"),("Ceilidh","B"),("Ceilidh","Auberge"),("Auberge","Elder Tree"),("Auberge","Ceilidh")],["Auberge","B","Ceilidh","Dawn of the world","Elder Tree"],True)
+graphe=Graph([("Auberge","Mountain"),("Mountain","Ceilidh"),("Mountain","Auberge"),("Ceilidh","Mountain"),("Ceilidh","Auberge"),("Auberge","Elder Tree"),("Auberge","Ceilidh")],["Auberge","Mountain","Ceilidh","Dawn of the world","Elder Tree"],True)
 graphe.ajout_arc("Auberge","Dawn of the world") if not graphe.orientation else graphe.ajout_arete("Auberge","Dawn of the world")
-#le truc b64
+
 pygame.init()
 screen = pygame.display.set_mode((1000, 700))
-background = affichage_graphe(graphe,pos = {"Auberge": (200, 400), "B": (600, 120),"Ceilidh": (660, 480),"Dawn of the world": (450, 500),"Elder Tree": (500, 230)})
+background = affichage_graphe(graphe,pos = {"Auberge": (200, 400), "Mountain": (600, 120),"Ceilidh": (660, 480),"Dawn of the world": (450, 500),"Elder Tree": (500, 230)})
 screen.blit(background,(0,0))
 running = True
 while running:
