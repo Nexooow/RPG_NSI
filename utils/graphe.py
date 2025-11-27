@@ -1,9 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import base64
 import numpy as np
 import pygame
 from io import BytesIO
+from PIL import Image
 
 class Graph:
     def __init__(self,aretes,sommets,orientation):
@@ -63,9 +63,8 @@ def def_graph(graphe):
     G.add_edges_from(graphe.aretes_tuple)
     G.add_nodes_from(graphe.sommets)
     return G
-def affichage_graphe(graphe,b64,pos):
-    img_bytes = base64.b64decode(b64)
-    img = plt.imread(BytesIO(img_bytes), format='webp')
+def affichage_graphe(graphe,pos):
+    img = plt.imread("img.webp")
     fig, ax = plt.subplots(figsize=(10, 7))
     ax.imshow(img,extent=[0,1000,700,0])
     G=def_graph(graphe)
@@ -86,7 +85,7 @@ graphe.ajout_arc("Auberge","Dawn of the world") if not graphe.orientation else g
 #le truc b64
 pygame.init()
 screen = pygame.display.set_mode((1000, 700))
-background = affichage_graphe(graphe,b64,pos = {"Auberge": (200, 400), "B": (600, 120),"Ceilidh": (660, 480),"Dawn of the world": (450, 500),"Elder Tree": (500, 230)})
+background = affichage_graphe(graphe,pos = {"Auberge": (200, 400), "B": (600, 120),"Ceilidh": (660, 480),"Dawn of the world": (450, 500),"Elder Tree": (500, 230)})
 screen.blit(background,(0,0))
 running = True
 while running:

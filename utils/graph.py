@@ -1,6 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-
+from PIL import Image
 
 class Graph:
 
@@ -62,5 +62,6 @@ class Graph:
         G = nx.DiGraph() if self.orientation else nx.Graph()
         G.add_nodes_from(self.sommets)
         G.add_edges_from(self.aretes)
+        img = Image.open("img.png").tobytes()
         nx.draw_networkx(G, node_color="skyblue", with_labels=True)
         plt.show()
