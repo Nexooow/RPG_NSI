@@ -6,27 +6,29 @@ class Action:
         self.complete = False
         self.json = json
         
-    def draw (self, screen):
+    def draw (self):
         pass
         
-    def update (self, events):
+    def update (self, event):
         pass
         
-    def executer (self):
+    def executer (self, jeu):
         pass
+        
+    def est_complete (self):
+        return self.complete
 
 class Dialogue (Action):
     
     def __init__ (self, json):
         super().__init__(json)
         
-    def draw (self, screen):
+    def draw (self):
         pass
         
-    def update (self, events):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]:
+    def update (self, event):
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             self.complete = True
         
-    def executer (self):
+    def executer (self, jeu):
         pass

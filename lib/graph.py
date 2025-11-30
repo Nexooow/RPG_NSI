@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
+import pygame
+
+from lib.render import screen
 
 class Graph:
     def __init__(self, sommets, aretes, pos, orientation=False, image="background.webp"):
@@ -68,7 +72,7 @@ class Graph:
         for arrete in self.aretes:
             G.add_edge(arrete[0], arrete[1], weight=arrete[2], label=arrete[2])
 
-        _, ax = plt.subplots(figsize=(10, 7))
+        fig, ax = plt.subplots(figsize=(10, 7))
         ax.imshow(img, extent=(0, 1000, 700, 0))
         aretes_labels = {
             (u, v): f"{data['weight']}h" for u, v, data in G.edges(data=True)
@@ -94,8 +98,11 @@ class Graph:
                 facecolor="white", pad=0.2, edgecolor="none"
             ) # cache l'étiquette derrière le label
         )
-        plt.show()
-
+        fig.canvas.draw()
+        image = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8).reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        pygame_surface = pygame.surfarray.make_surface(np.transpose(image, (1, 0, 2)))
+        plt.close(fig)
+        screen.blit(pygame_surface, (0, 0))
 
 if __name__ == "__main__":
     sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]

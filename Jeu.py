@@ -1,7 +1,10 @@
-from PIL.TiffImagePlugin import SAMPLEFORMAT
+import pygame
+
 from lib.graph import Graph
+from Action import Action
 from JSONLoader import JSONLoader
 from lib.file import File
+from lib.render import draw_rectangle, text_render_centered, text_render, screen
 
 sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
 aretes = [
@@ -24,13 +27,13 @@ positions_sommets = {
 
 class Jeu:
 
-    def __init__ (self, id: str, json: dict = None):
+    def __init__ (self, id: str, json: dict | None = None):
         
         self.identifiant = id
         
         self.loader = JSONLoader(self)
-        self.scene_actuelle = None
-        self.scenes = File()
+        self.action_actuelle: Action | None = None
+        self.actions = File()
         
         self.carte = Graph(
             sommets,
@@ -41,20 +44,46 @@ class Jeu:
         )
         
         self.regions = {}
-        self.region = json["emplacement"]["region"] or "Auberge"
-        self.lieu = json["emplacement"]["lieu"] or self.regions[self.region].lieu_depart
-        
+        self.region = json["emplacement"]["region"] if json else "Auberge"
+        # self.lieu = json["emplacement"]["lieu"] if json else self.regions[self.region].lieu_depart
         self.jour = 1
         self.heure = 12
         self.minute = 0
 
     def gerer_evenement (self, evenement):
-        pass
-
-    def scene (self, screen):
+        if self.action_actuelle is not None:
+            self.action_actuelle.update(evenement)
+            
+    def executer_sequence (self, id):
+        sequence = self.loader.actions_sequences[id]
+        for action in sequence:
+            self.actions.enfiler(action)
+            
+    def executer (self):
+        action = self.action_actuelle
+        if action is None:
+            if not self.actions.est_vide():
+                self.action_actuelle = self.actions.defiler()
+                assert self.action_actuelle is not None
+                self.action_actuelle.executer(self)
+        else:
+            if action.est_complete():
+                if not self.actions.est_vide():
+                    self.action_actuelle = self.actions.defiler()
+                    assert self.action_actuelle is not None
+                    self.action_actuelle.executer(self)
+                else:
+                    self.action_actuelle = None
+                    
+    def scene (self):
+        if self.action_actuelle is not None:
+            self.action_actuelle.draw()
+        self.ui()
+        
+    def ui (self):
         pass
         
-    def deplacement (self, lieu, est_region = False):
+    def deplacement (self, lieu_region, est_region = False):
         pass
         
     def save (self):

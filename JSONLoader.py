@@ -1,44 +1,38 @@
 import json
 import os
 from random import random, randint
+import glob
 
-from NPC import NPC
-from Action import Action
+from Action import Dialogue
 
 class JSONLoader:
     
     def __init__ (self, parent):
         self.parent = parent
         
-        self.actions = {}
-        self.npcs = {}
+        self.actions_sequences = {}
         
         self.charger_actions()
-        self.charger_npcs()
+        # self.charger_npcs()
                 
     def charger_actions (self):
-        actionsFiles = os.listdir("./data/actions")
-        for actionName in actionsFiles:
+        files = glob.glob("./data/actions/*.json")
+        for file in files:
             try:
-                with open(f"./data/actions/{actionName}", 'r') as file:
-                    content = json.load(file)
-                    if isinstance(content, dict):
-                        self.actions[content["id"]] = Action(content)
-                    elif isinstance(content, list):
-                        for action_json in content:
-                            self.actions[action_json["id"]] = Action(action_json)
+                with open(file, 'r') as f:
+                    content = json.load(f)
+                    id = content["id"]
+                    self.actions_sequences[id] = []
+                    for action in content['run']:
+                        self.actions_sequences[id].append(
+                            self.creer_action(action)
+                        )
             except Exception:
                 continue
                 
-    def charger_npcs (self):
-        npcsFiles = os.listdir("./data/npcs")
-        for npcName in npcsFiles:
-            try:
-                with open(f"./data/npcs/{npcName}", 'r') as file:
-                    content = json.load(file)
-                    self.npcs[content["id"]] = NPC(content)
-            except Exception:
-                continue
+    def creer_action (self, data: dict):
+        if data["type"] == "dialogue":
+            return Dialogue(data)
 
     def tirer_action (self, chance, chance_negative):
         evenement = random()*100 <= chance

@@ -6,8 +6,11 @@ class File:
     def defiler (self):
         return self.contenu.pop(0)
     
-    def empiler (self, valeur):
+    def enfiler (self, valeur):
         self.contenu.append(valeur)
 
     def sommet (self):
         return self.contenu[0]
+    
+    def est_vide (self):
+        return len(self.contenu) == 0
