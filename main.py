@@ -18,6 +18,7 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 jeu.running = False
         jeu.gerer_evenement(events)
+        jeu.executer()
         
         screen.fill((0, 0, 0))
         jeu.fond.fill((0, 0, 0, 0))

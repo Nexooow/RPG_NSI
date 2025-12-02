@@ -1,11 +1,32 @@
 {
-    "type": "event",
     "id": "test",
-    "chance": "bad",
+    "type": "action",
     "run": [
         {
-            "type": "dialog",
-            "lines": ["Salut !"]
+            "type": "dialogue",
+            "lines": [
+                "Bienvenue cher aventurier !"
+            ]
+        },
+        {
+            "type": "select",
+            "question": "Quel est votre classe ?",
+            "options": [
+                {
+                    "name": "Mage",
+                    "description": "envoyez des boules de feu",
+                    "value": "mage"
+                },
+                {
+                    "name": "Guerrier",
+                    "description": "vous battre (wow)",
+                    "value": "guerrier"
+                }
+            ],
+            "actions": {
+                "guerrier": "test",
+                "mage": "boom"
+            }
         }
     ]
 }

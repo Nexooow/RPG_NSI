@@ -1,18 +1,21 @@
 import pygame
 
+from lib.render import text_render_centered
+
 class Action:
     
-    def __init__ (self, json):
+    def __init__ (self, jeu, json):
         self.complete = False
+        self.jeu = jeu
         self.json = json
         
     def draw (self):
         pass
         
-    def update (self, event):
+    def update (self, events):
         pass
         
-    def executer (self, jeu):
+    def executer (self):
         pass
         
     def est_complete (self):
@@ -20,15 +23,48 @@ class Action:
 
 class Dialogue (Action):
     
-    def __init__ (self, json):
-        super().__init__(json)
+    def __init__ (self, jeu, json):
+        super().__init__(jeu, json)
         
     def draw (self):
+        for line in self.json["lines"]:
+            text_render_centered(self.jeu.ui_surface, line, "regular", (0, 0, 0, 255), (1280/2, 550))
+        
+    def update (self, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.complete = True
+        
+    def executer (self):
         pass
+
+class Selection (Action):
+    
+    def __init__ (self, jeu, json):
+        super().__init__(jeu, json)
+        self.option_choisie = 0
         
-    def update (self, event):
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            self.complete = True
-        
-    def executer (self, jeu):
+    def draw (self):
+        print(self.option_choisie)
+        reversed_options = self.json["options"][::-1]
+        for index, choix in enumerate(reversed_options):
+            print(index, choix)
+            text_render_centered(
+                self.jeu.ui_surface,
+                str(choix["name"])+str(index),
+                "regular",
+                pos=(1280/2, 650-(50*index)),
+                underline=index==self.option_choisie,
+            )
+        text_render_centered(
+            self.jeu.ui_surface, 
+            self.json["question"], 
+            "bold", 
+            pos=(1280/2, 650-(50*len(reversed_options)))
+        )
+
+    def update (self, events):
+        pass
+    
+    def executer (self):
         pass

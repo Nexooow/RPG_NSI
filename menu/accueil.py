@@ -31,7 +31,6 @@ class Accueil (Menu):
         pygame.mixer.music.stop()
         
     def update (self, events):
-        print("accueil update")
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                 if self.menu_selected_option != 0:
@@ -45,7 +44,7 @@ class Accueil (Menu):
                     self.menu_selected_option = 2
             elif event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE):
                 self.fermer()
-                self.jeu.fade = 255
+                self.jeu.fade = 500
                 sound = pygame.mixer.Sound("./assets/sounds/accueil_clique.mp3")
                 sound.set_volume(0.25)
                 sound.play()
@@ -60,7 +59,6 @@ class Accueil (Menu):
         
         
     def draw (self):
-        print("accueil draw")
         doit_generer = True if random.randint(1, 100) == 1 else False
         if doit_generer:
             particule_position = random.randint(0, 1280)

@@ -1,4 +1,5 @@
 import pygame
+import math
 
 from lib.graph import Graph
 from Action import Action
@@ -67,6 +68,7 @@ class Jeu:
         self.statut = "jeu"
         self.accueil.fermer()
         self.identifiant = id
+        self.executer_sequence("test")
         
     def save (self):
         pass
@@ -82,7 +84,7 @@ class Jeu:
                 self.action_actuelle.update(evenements)
             
     def executer_sequence (self, id):
-        sequence = self.loader.actions_sequences[id]
+        sequence = self.loader.recuperer_sequence(id)
         for action in sequence:
             self.actions.enfiler(action)
             
@@ -92,13 +94,13 @@ class Jeu:
             if not self.actions.est_vide():
                 self.action_actuelle = self.actions.defiler()
                 assert self.action_actuelle is not None
-                self.action_actuelle.executer(self)
+                self.action_actuelle.executer()
         else:
             if action.est_complete():
                 if not self.actions.est_vide():
                     self.action_actuelle = self.actions.defiler()
                     assert self.action_actuelle is not None
-                    self.action_actuelle.executer(self)
+                    self.action_actuelle.executer()
                 else:
                     self.action_actuelle = None
                     
@@ -117,8 +119,8 @@ class Jeu:
         
     def filters (self):
         if self.fade > 0:
-            pygame.draw.rect(self.filter_surface, (0, 0, 0, self.fade), self.filter_surface.get_rect())
-            self.fade -= 5
+            pygame.draw.rect(self.filter_surface, (0, 0, 0, min([self.fade, 255])), self.filter_surface.get_rect())
+            self.fade -= 4
         elif self.fade <= 0:
             self.fade = 0
         

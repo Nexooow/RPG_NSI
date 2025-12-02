@@ -3,7 +3,7 @@ import os
 from random import random, randint
 import glob
 
-from Action import Dialogue
+from Action import Dialogue, Selection
 
 class JSONLoader:
     
@@ -11,6 +11,7 @@ class JSONLoader:
         self.parent = parent
         
         self.actions_sequences = {}
+        self.actions_types = {}
         
         self.charger_actions()
         # self.charger_npcs()
@@ -22,6 +23,11 @@ class JSONLoader:
                 with open(file, 'r') as f:
                     content = json.load(f)
                     id = content["id"]
+                    type_sequence = content["type"]
+                    if type_sequence in self.actions_types.keys():
+                        self.actions_types[type_sequence].append(id)
+                    else:
+                        self.actions_types[type_sequence] = [id]
                     self.actions_sequences[id] = []
                     for action in content['run']:
                         self.actions_sequences[id].append(
@@ -29,10 +35,18 @@ class JSONLoader:
                         )
             except Exception:
                 continue
+            
+        print(self.actions_sequences)
+            
+            
+    def recuperer_sequence (self, sequence_id):
+        return self.actions_sequences[sequence_id]
                 
     def creer_action (self, data: dict):
-        if data["type"] == "dialogue":
-            return Dialogue(data)
+        if data["type"] == "dialogue" or data["type"] == "dialog":
+            return Dialogue(self.parent, data)
+        elif data["type"] == "select":
+            return Selection(self.parent, data)
 
     def tirer_action (self, chance, chance_negative):
         evenement = random()*100 <= chance
