@@ -1,22 +1,37 @@
+from ast import Not
+from tkinter.constants import N
 import pygame
 
 from lib.render import text_render_centered
 
 class Action:
     
-    def __init__ (self, jeu, json):
+    def __init__ (self, jeu, json = {}):
         self.complete = False
         self.jeu = jeu
         self.json = json
+        self.desactive_ui = False
         
     def draw (self):
-        pass
+        """
+        Méthode pour dessiner l'action sur l'écran.
+        Retourne une erreur si la méthode n'est pas implémentée.
+        """
+        raise NotImplementedError("La méthode draw n'est pas implémentée")
         
     def update (self, events):
-        pass
+        """
+        Méthode pour dessiner l'action sur l'écran.
+        Retourne une erreur si la méthode n'est pas implémentée.
+        """
+        raise NotImplementedError("La méthode update n'est pas implémentée")
         
     def executer (self):
-        pass
+        """
+        Méthode pour dessiner l'action sur l'écran.
+        Retourne une erreur si la méthode n'est pas implémentée.
+        """
+        raise NotImplementedError("La méthode executer n'est pas implémentée")
         
     def est_complete (self):
         return self.complete
@@ -28,7 +43,7 @@ class Dialogue (Action):
         
     def draw (self):
         for line in self.json["lines"]:
-            text_render_centered(self.jeu.ui_surface, line, "regular", (0, 0, 0, 255), (1280/2, 550))
+            text_render_centered(self.jeu.ui_surface, line, "regular", (0, 0, 0, 255), (1000/2, 550))
         
     def update (self, events):
         for event in events:
@@ -53,14 +68,14 @@ class Selection (Action):
                 self.jeu.ui_surface,
                 str(choix["name"])+str(index),
                 "regular",
-                pos=(1280/2, 650-(50*index)),
+                pos=(1000/2, 650-(50*index)),
                 underline=index==self.option_choisie,
             )
         text_render_centered(
             self.jeu.ui_surface, 
             self.json["question"], 
             "bold", 
-            pos=(1280/2, 650-(50*len(reversed_options)))
+            pos=(1000/2, 650-(50*len(reversed_options)))
         )
 
     def update (self, events):

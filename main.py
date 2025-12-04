@@ -3,9 +3,10 @@ import pygame
 from Jeu import Jeu
 
 pygame.init()
+pygame.mixer.init()
 pygame.display.set_caption("Game Name")
 
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode((1000, 700))
 
 if __name__ == "__main__":
     

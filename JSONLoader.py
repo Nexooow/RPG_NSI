@@ -35,10 +35,16 @@ class JSONLoader:
                         )
             except Exception:
                 continue
-            
-        print(self.actions_sequences)
-            
-            
+        print("Sequences chargées:", self.actions_sequences)
+        
+    def charger_lieux (self):
+        with open("./data/lieux.json", 'r') as f:
+            content = json.load(f)
+            for lieu in content:
+                region_nom = lieu["region"]
+                region = self.parent.regions[region_nom]
+                region.lieux[lieu["id"]] = lieu
+        
     def recuperer_sequence (self, sequence_id):
         if sequence_id in self.actions_sequences.keys():
             return self.actions_sequences[sequence_id]

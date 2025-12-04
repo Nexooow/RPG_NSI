@@ -9,11 +9,8 @@ class Explosion(pygame.sprite.Sprite):
     def __init__(self, x, y, size):
         super().__init__()
         self.images = []
-        with open("sprite.txt", "r") as f:
-            lines = f.read().splitlines()
         for i in range(5):
-            img_data = base64.b64decode(lines[i])
-            img = pygame.image.load(BytesIO(img_data))
+            img = pygame.image.load("./assets/sprites/explosion_" + str(i+1) + ".png")
             img = pygame.transform.scale(img, (400 * size, 400 * size))
             self.images.append(img)
         self.explosion_speed = 4

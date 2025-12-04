@@ -61,10 +61,10 @@ class Accueil (Menu):
     def draw (self):
         doit_generer = True if random.randint(1, 100) == 1 else False
         if doit_generer:
-            particule_position = random.randint(0, 1280)
+            particule_position = random.randint(0, 1000)
             particule_taille = random.randint(1, 2)
             alpha = random.randint(80, 225)
-            self.particules.append(([particule_position, 720], alpha, particule_taille))
+            self.particules.append(([particule_position, 700], alpha, particule_taille))
         
         for particle in self.particules:
             pygame.draw.circle(self.jeu.fond, (245, 205, 0, particle[1]), particle[0], particle[2])
@@ -72,25 +72,25 @@ class Accueil (Menu):
             if particle[0][1] < 0:
                 self.particules.remove(particle)
                     
-        text_render_centered(self.jeu.fond, "Game Name", "extrabold", color=(255, 255, 255), pos=(1280/2, 175), size=128)
+        text_render_centered(self.jeu.fond, "Game Name", "extrabold", color=(255, 255, 255), pos=(1000/2, 175), size=128)
             
         text_render_centered(self.jeu.fond, "Créer une partie", "regular",
             color = (245, 205, 0, 185),
-            pos=(1280/2, 350),
+            pos=(1000/2, 350),
             underline=self.menu_selected_option == 0
         )
         text_render_centered(self.jeu.fond, "Charger une partie", "regular",
             color = (245, 205, 0, 185) if len(self.saves) > 0 else (255-100, 215-100, 0, 140),
-            pos=(1280/2, 400),
+            pos=(1000/2, 400),
             underline=self.menu_selected_option == 1
         )
         text_render_centered(self.jeu.fond, "Paramètres", "regular",
             color = (245, 205, 0, 185),
-            pos=(1280/2, 450),
+            pos=(1000/2, 450),
             underline=self.menu_selected_option == 2
         )
         text_render_centered(self.jeu.fond, "Quitter", "regular",
             color = (245, 205, 0, 185),
-            pos=(1280/2, 500),
+            pos=(1000/2, 500),
             underline=self.menu_selected_option == 3
         )
