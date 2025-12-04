@@ -1,8 +1,12 @@
+from lib.graph import Graph
+from Jeu import Jeu
+
 class Region:
-    def __init__ (self, nom, description):
+    
+    def __init__(self, jeu: Jeu, nom):
+        self.jeu = jeu
         self.nom = nom
-        self.description = description
+        self.carte = Graph()
+        self.lieux = []
         
-    def __str__(self):
-        return f"Region {self.nom} : {self.description}"
     

@@ -17,7 +17,7 @@ class JSONLoader:
         # self.charger_npcs()
                 
     def charger_actions (self):
-        files = glob.glob("./data/actions/**/*.json")
+        files = glob.glob("./data/actions/*.json")
         for file in files:
             try:
                 with open(file, 'r') as f:
@@ -40,7 +40,10 @@ class JSONLoader:
             
             
     def recuperer_sequence (self, sequence_id):
-        return self.actions_sequences[sequence_id]
+        if sequence_id in self.actions_sequences.keys():
+            return self.actions_sequences[sequence_id]
+        else:
+            return None
                 
     def creer_action (self, data: dict):
         if data["type"] == "dialogue" or data["type"] == "dialog":

@@ -4,7 +4,7 @@ import numpy as np
 import pygame
 
 class Graph:
-    def __init__(self, sommets, aretes, pos, orientation=False, image="background.webp"):
+    def __init__(self, sommets = [], aretes = [], pos = {}, orientation=False, image="background.webp"):
         self.aretes = aretes
         if not orientation:
             self.aretes = [(s2, s1, p) for s1, s2, p in self.aretes if s1 != s2 and (s2, s1, p) not in self.aretes]

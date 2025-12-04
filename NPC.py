@@ -1,7 +1,8 @@
 class NPC:
 
-    def __init__ (self, json):
+    def __init__ (self, jeu, json):
+        self.jeu = jeu
         self.json = json
 
-    def interagir (self, joueur):
+    def interagir (self):
         pass

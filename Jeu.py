@@ -85,8 +85,9 @@ class Jeu:
             
     def executer_sequence (self, id):
         sequence = self.loader.recuperer_sequence(id)
-        for action in sequence:
-            self.actions.enfiler(action)
+        if sequence:
+            for action in sequence:
+                self.actions.enfiler(action)
             
     def executer (self):
         action = self.action_actuelle
