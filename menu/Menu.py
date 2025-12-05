@@ -1,13 +1,14 @@
 class Menu:
     
-    def __init__ (self):
+    def __init__ (self, jeu):
+        self.jeu = jeu
         pass
         
     def ouvrir (self):
         pass
         
     def fermer (self):
-        pass
+        self.jeu.menu = None
         
     def update (self, events):
         pass

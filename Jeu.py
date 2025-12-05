@@ -1,12 +1,14 @@
 import pygame
 import math
 
-from boss.Radahn import Radahn
+from boss.radahn import Radahn
 from lib.graph import Graph
 from Action import Action
 from JSONLoader import JSONLoader
 from lib.file import File
+from menu.carte import Carte
 from menu.accueil import Accueil
+from Region import Region
 
 sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
 aretes = [
@@ -24,7 +26,7 @@ positions_sommets = {
     "Mountain": (600, 120),
     "Ceilidh": (660, 480),
     "Dawn of the world": (450, 500),
-    "Elder Tree": (500, 230),
+    "Elder Tree": (500, 260),
 }
 
 class Jeu:
@@ -33,7 +35,7 @@ class Jeu:
         
         self.running = True
         self.statut = "accueil"
-        self.accueil = Accueil(self)
+        self.menu = Accueil(self)
         self.clock = pygame.time.Clock()
         
         self.fond = pygame.Surface((1000, 700), pygame.SRCALPHA)
@@ -54,7 +56,13 @@ class Jeu:
             "background.webp"
         )
         self.lieux_visite = set()
-        self.regions = {}
+        self.regions = {
+            "Auberge": Region(self, "Auberge"),
+            "Mountain": Region(self, "Mountain", image="mountain.jpg"),
+            "Ceilidh": Region(self, "Ceilidh", image="ceilidh.jpg"),
+            "Dawn of the world": Region(self, "Dawn of the world"),
+            "Elder Tree": Region(self, "Elder Tree")
+        }
         self.region = None
         self.lieu = None
         
@@ -68,9 +76,11 @@ class Jeu:
         
     def demarrer (self, id: str, json = None):
         self.statut = "jeu"
-        self.accueil.fermer()
+        self.menu.fermer()
+        self.menu = None
         self.identifiant = id
-        self.ajouter_action(Radahn(self))
+        #self.executer_sequence("test")
+        #self.ajouter_action(Radahn(self))
         
     def save (self):
         pass
@@ -79,13 +89,13 @@ class Jeu:
         self.running = False
         
     def gerer_evenement (self, evenements):
-        if self.statut == "accueil":
-            self.accueil.update(evenements)
-        elif self.statut == "pause":
-            pass
-        elif self.statut == "carte":
-            pass
-        else:
+        if self.menu is not None:
+            self.menu.update(evenements)
+        if self.statut == "jeu":
+            for event in evenements:
+                if self.menu is None:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+                        self.ouvrir_menu(Carte(self))
             if self.action_actuelle is not None:
                 self.action_actuelle.update(evenements)
             
@@ -98,6 +108,13 @@ class Jeu:
         if sequence:
             for action in sequence:
                 self.ajouter_action(action)
+    
+    def fermer_menu (self):
+        self.menu = None
+                
+    def ouvrir_menu (self, menu):
+        self.menu = menu
+        self.menu.ouvrir()
             
     def executer (self):
         action = self.action_actuelle
@@ -116,13 +133,15 @@ class Jeu:
                     self.action_actuelle = None
                     
     def scene (self):
-        if self.statut == "accueil":
-            self.accueil.draw()
-        elif self.statut == "jeu":
+        if self.menu is not None:
+            self.menu.draw()
+        if self.statut == "jeu":
+            self.fond.fill((255, 255, 255))
             if self.action_actuelle is not None:
                 self.action_actuelle.draw()
             self.ui()
         self.filters() # applique les filtres sur l'écran
+        
         
     def ui (self):
         if self.action_actuelle is not None:

@@ -1,15 +1,19 @@
 from lib.graph import Graph
-from Jeu import Jeu
-
 class Region:
     
-    def __init__(self, jeu: Jeu, nom, action_entree = None, action_sortie = None):
+    def __init__(self, jeu, nom, action_entree = None, action_sortie = None, image=None):
         self.jeu = jeu
         self.nom = nom
         self.carte = Graph()
         self.lieux = {}
+        self.position = self.jeu.carte.pos[self.nom]
         self.action_entree = action_entree
         self.action_sortie = action_sortie
+        self.background = image
+        
+    def afficher (self):
+        self.carte.affichage(self.jeu.fond)
+        pass
         
     def entrer (self):
         if self.nom not in self.jeu.lieux_visite:

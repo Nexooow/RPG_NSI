@@ -58,9 +58,6 @@ class Meteor:
         centre = self.rect.center
         self.rect = self.frame.get_rect(center=centre)
 
-    def collision(self):
-        return self.rect.colliderect(targetRect)
-
     def impact_force(self):
         return int(
             0.5

@@ -20,7 +20,7 @@ def display_frames(image, frame_width, frame_height):
 
 background = pygame.image.load("./assets/sprites/radahn_fightzone.jpg")
 half_radahn = pygame.image.load("./assets/sprites/radahn.png")
-radahn_frames = display_frames(half_radahn, 1200, 1350)
+radahn_frames = display_frames(half_radahn, 1422, 1600)
 
 class Radahn(Action):
     def __init__(self, jeu):
@@ -40,7 +40,7 @@ class Radahn(Action):
         pass
 
     def draw(self):
-        self.radahn_frame_index = (self.radahn_frame_index + 1) % len(radahn_frames)
+        self.jeu.fond.blit(background, (0, 0))
         this = randint(1, 200)
         if len(self.meteors) < 10 and this <= 10:
             if this > 3:
@@ -49,8 +49,9 @@ class Radahn(Action):
                 border = choice([25, 910])
                 self.meteors.append(Meteor((border, randint(-25, 150))))
         self.explosion_group.update()
+        
         self.jeu.fond.blit(radahn_frames[self.radahn_frame_index], (0, -120))
-        self.jeu.fond.blit(background, (0, 0))
+        self.radahn_frame_index = (self.radahn_frame_index + 1) % len(radahn_frames)
         for meteor in self.meteors:
             meteor.deplace()
             meteor.frame_index = (meteor.frame_index + 1) % len(meteor.frames)
@@ -68,7 +69,7 @@ class Radahn(Action):
         )
         text_render_centered_up(
             self.jeu.ui_surface,
-            "Time: " + str(round(time() - self.start_time)),
+            "Time: " + str(round(195-(time() - self.start_time))),
             "bold",
             color=(255, 0, 0),
             pos=(500, 150),

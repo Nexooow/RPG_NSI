@@ -15,6 +15,12 @@ class Graph:
 
     def __str__(self):
         return f"Graph ({self.aretes}, {self.sommets}, {self.orientation})"
+    
+    def ajout_position (self, sommet, pos):
+        self.pos[sommet] = pos
+    
+    def ajout_sommet (self, sommet):
+        self.sommets.append(sommet)
 
     def ajout_arc(self, sommet1, sommet2, poids=0):
         self.aretes.append((sommet1, sommet2, poids))
@@ -39,7 +45,6 @@ class Graph:
         return voisins
 
     def successeur(self, sommet):
-        assert not self.orientation, "Le graphe n'est pas orienté"
         successeurs = []
         for arete in self.aretes:
             if arete[0] == sommet:
@@ -47,7 +52,6 @@ class Graph:
         return successeurs
 
     def predecesseur(self, sommet):
-        assert not self.orientation, "Le graphe n'est pas orienté"
         predecesseurs = []
         for arete in self.aretes:
             if arete[1] == sommet:
@@ -63,7 +67,7 @@ class Graph:
         return somme_degres == 2 * len(self.aretes)
 
     def affichage(self, screen):
-        img = plt.imread(f"assets/{self.image}.webp")
+        img = plt.imread(f"assets/maps/{self.image}")
         G = nx.DiGraph() if self.orientation else nx.Graph()
 
         G.add_nodes_from(self.sommets)

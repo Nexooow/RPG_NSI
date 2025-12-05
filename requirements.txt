@@ -1,5 +1,4 @@
 pygame
-pygame-menu
 networkx
 matplotlib
 glob

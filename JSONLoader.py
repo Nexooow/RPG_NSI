@@ -44,6 +44,15 @@ class JSONLoader:
                 region_nom = lieu["region"]
                 region = self.parent.regions[region_nom]
                 region.lieux[lieu["id"]] = lieu
+                if lieu["id"] not in region.carte.sommet():
+                    region.carte.ajout_sommet(lieu["id"])
+                for route in lieu["routes"]:
+                    if route["id"] not in region.carte.sommet():
+                        region.carte.ajout_sommet(route["id"])
+                    if route["bidirectionnel"]:
+                        region.carte.ajout_arrete(lieu["id"], route["id"], route["temps"])
+                    else:
+                        region.carte.ajout_arc(lieu["id"], route["id"], route["temps"])
         
     def recuperer_sequence (self, sequence_id):
         if sequence_id in self.actions_sequences.keys():

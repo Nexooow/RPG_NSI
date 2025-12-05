@@ -25,7 +25,7 @@ class Accueil (Menu):
     def ouvrir (self):
         pygame.mixer.music.load('./assets/music/intro.mp3')
         pygame.mixer.music.set_volume(0.01)
-        pygame.mixer.music.play(1, 0, 1000)
+        pygame.mixer.music.play(1)
         
     def fermer (self):
         pygame.mixer.music.stop()
