@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pygame
+from lib.compatibility import get_canvas_buffer
 
 class Graph:
     def __init__(self, sommets = [], aretes = [], pos = {}, orientation=False, image="background.webp"):
@@ -101,7 +102,7 @@ class Graph:
             ) # cache l'étiquette derrière le label
         )
         fig.canvas.draw()
-        image = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8).reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        image = np.frombuffer(get_canvas_buffer(fig.canvas), dtype=np.uint8).reshape(fig.canvas.get_width_height()[::-1] + (3,))
         pygame_surface = pygame.surfarray.make_surface(np.transpose(image, (1, 0, 2)))
         plt.close(fig)
         screen.blit(pygame_surface, (0, 0))
