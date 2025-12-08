@@ -2,13 +2,21 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pygame
+
 from lib.compatibility import get_canvas_buffer
 
 class Graph:
-    def __init__(self, sommets = [], aretes = [], pos = {}, orientation=False, image="background.webp"):
+    def __init__(
+        self, sommets=[], aretes=[], pos={}, orientation=False, image="background.webp"
+    ):
+        print(image)
         self.aretes = aretes
         if not orientation:
-            self.aretes = [(s2, s1, p) for s1, s2, p in self.aretes if s1 != s2 and (s2, s1, p) not in self.aretes]
+            self.aretes = [
+                (s2, s1, p)
+                for s1, s2, p in self.aretes
+                if s1 != s2 and (s2, s1, p) not in self.aretes
+            ]
         self.sommets = sommets
         self.pos = pos
         self.orientation = orientation
@@ -16,11 +24,11 @@ class Graph:
 
     def __str__(self):
         return f"Graph ({self.aretes}, {self.sommets}, {self.orientation})"
-    
-    def ajout_position (self, sommet, pos):
+
+    def ajout_position(self, sommet, pos):
         self.pos[sommet] = pos
-    
-    def ajout_sommet (self, sommet):
+
+    def ajout_sommet(self, sommet):
         self.sommets.append(sommet)
 
     def ajout_arc(self, sommet1, sommet2, poids=0):
@@ -67,13 +75,16 @@ class Graph:
         # un graphe est complet quand la somme des degrés de tous les sommets est égale au double du nombre d'arêtes
         return somme_degres == 2 * len(self.aretes)
 
-    def affichage(self, screen):
-        img = plt.imread(f"assets/maps/{self.image}")
+    def get_graph(self):
         G = nx.DiGraph() if self.orientation else nx.Graph()
-
         G.add_nodes_from(self.sommets)
         for arrete in self.aretes:
             G.add_edge(arrete[0], arrete[1], weight=arrete[2], label=arrete[2])
+        return G
+
+    def affichage(self, screen):
+        img = plt.imread(f"assets/maps/{self.image}")
+        G = self.get_graph()
 
         fig, ax = plt.subplots(figsize=(10, 7))
         ax.imshow(img, extent=(0, 1000, 700, 0))
@@ -99,37 +110,19 @@ class Graph:
             font_family="Arial",
             bbox=dict(
                 facecolor="white", pad=0.2, edgecolor="none"
-            ) # cache l'étiquette derrière le label
+            ),  # cache l'étiquette derrière le label
         )
         fig.canvas.draw()
-        image = np.frombuffer(get_canvas_buffer(fig.canvas), dtype=np.uint8).reshape(fig.canvas.get_width_height()[::-1] + (3,))
+        buf = get_canvas_buffer(fig.canvas)
+        w, h = fig.canvas.get_width_height()
+        image = np.frombuffer(buf, dtype=np.uint8).reshape((h, w, 4))
+        image = image[..., :3]
         pygame_surface = pygame.surfarray.make_surface(np.transpose(image, (1, 0, 2)))
         plt.close(fig)
         screen.blit(pygame_surface, (0, 0))
 
-if __name__ == "__main__":
-    sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
-    aretes = [
-        ("Auberge", "Mountain", 0),
-        ("Mountain", "Ceilidh", 0),
-        ("Mountain", "Auberge", 0),
-        ("Ceilidh", "Mountain", 0),
-        ("Ceilidh", "Auberge", 0),
-        ("Auberge", "Elder Tree", 0),
-        ("Auberge", "Ceilidh", 0),
-        ("Auberge", "Dawn of the world", 0)
-    ]
-    pos = {
-        "Auberge": (200, 400),
-        "Mountain": (600, 120),
-        "Ceilidh": (660, 480),
-        "Dawn of the world": (450, 500),
-        "Elder Tree": (500, 230),
-    }
-    graph = Graph(
-        sommets,
-        aretes,
-        pos,
-        True,
-        "background.webp"
-    )
+    def paths(self, a, b):
+        G = self.get_graph()
+        chemin = list(nx.shortest_path(G, source=a, target=b, weight="weight"))
+        poids = nx.shortest_path_length(G, source=a, target=b, weight="weight")
+        return chemin, poids

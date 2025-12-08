@@ -1,6 +1,5 @@
 import pygame
 
-
 def font_render (text, font, color=(0, 0, 0), size=None):
     if font == "extrabold":
         font = pygame.font.Font("./assets/fonts/CinzelDecorative-Black.ttf", size or 56)
