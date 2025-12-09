@@ -10,6 +10,9 @@ class Action:
         self.json = json
         self.desactive_ui = False
         
+    def __repr__ (self):
+        return str(self.json)
+        
     def draw (self):
         """
         Méthode pour dessiner l'action sur l'écran.

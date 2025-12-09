@@ -9,7 +9,6 @@ class Graph:
     def __init__(
         self, sommets=[], aretes=[], pos={}, orientation=False, image="background.webp"
     ):
-        print(image)
         self.aretes = aretes
         if not orientation:
             self.aretes = [

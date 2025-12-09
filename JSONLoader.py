@@ -14,6 +14,7 @@ class JSONLoader:
         self.actions_types = {}
         
         self.charger_actions()
+        self.charger_lieux()
         # self.charger_npcs()
                 
     def charger_actions (self):
@@ -33,9 +34,9 @@ class JSONLoader:
                         self.actions_sequences[id].append(
                             self.creer_action(action)
                         )
+                    print(f"- Sequence d'actions chargée: {id}")
             except Exception:
                 continue
-        print("Sequences chargées:", self.actions_sequences)
         
     def charger_lieux (self):
         with open("./data/lieux.json", 'r') as f:
@@ -56,6 +57,7 @@ class JSONLoader:
                         region.carte.ajout_arrete(id, route["id"], route["temps"])
                     else:
                         region.carte.ajout_arc(id, route["id"], route["temps"])
+                print(f"- Lieu chargé: {id}")
         
     def recuperer_sequence (self, sequence_id):
         if sequence_id in self.actions_sequences.keys():

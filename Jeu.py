@@ -1,5 +1,6 @@
 import pygame
 import math
+import json
 
 from lib.file import File
 from lib.graph import Graph
@@ -89,11 +90,28 @@ class Jeu:
         self.identifiant = id
         self.joueur = Joueur(self, json)
         self.executer_sequence("test")
-        #self.ajouter_action(Radahn(self))
+        print(self.joueur.save())
+        self.save()
+        
+    def restaurer (self, json):
+        if json["actions"]:
+            for action in json["actions"]:
+                action_instance = self.loader.creer_action(action)
+                self.ajouter_action(action_instance)
+        if json["action_actuelle"]: self.action_actuelle = self.loader.creer_action(action)
+            
         
     def save (self):
-        pass
+        data = {
+            "id": self.identifiant,
+            "joueur": self.joueur.save(),
+            "jour": self.jour,
+            "heure": self.heure,
+            "minute": self.minute
+        }
+        json.dump(data, open(f"./saves/{self.identifiant}.json", "w"))
         
+    
     def quitter (self):
         self.running = False
         
