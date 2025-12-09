@@ -1,0 +1,17 @@
+[
+    {
+        "id": "The Toucher",
+        "region": "Cailidh",
+        "location": {
+            "x": 650,
+            "y": 150
+        },
+        "routes": [
+            {
+                "id": "Old Castle",
+                "temps": 6,
+                "bidirectionnel": true
+            }
+        ]
+    }
+]
