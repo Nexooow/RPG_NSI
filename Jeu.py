@@ -46,11 +46,6 @@ class Jeu:
         self.fond = pygame.Surface((1000, 700), pygame.SRCALPHA)
         self.ui_surface = pygame.Surface((1000, 700), pygame.SRCALPHA)
         self.filter_surface = pygame.Surface((1000, 700), pygame.SRCALPHA)
-        
-        # affichage
-        self.loader = JSONLoader(self)
-        self.action_actuelle: Action | None = None
-        self.actions = File()
 
         # carte et regions/lieux
         self.carte = Graph(
@@ -70,6 +65,10 @@ class Jeu:
         }
         self.region = None
         self.lieu = self.region.entree if self.region else None
+        
+        self.loader = JSONLoader(self)
+        self.action_actuelle: Action | None = None
+        self.actions = File()
         
         # temps
         self.jour = 1

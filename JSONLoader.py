@@ -44,6 +44,7 @@ class JSONLoader:
             for lieu in content:
                 id = lieu["id"]
                 region_nom = lieu["region"]
+                print(self.parent.__dict__)
                 region = self.parent.regions[region_nom]
                 region.lieux[id] = lieu
                 if lieu["entree"]:
