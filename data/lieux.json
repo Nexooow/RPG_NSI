@@ -1,102 +1,81 @@
 [
     {
-        "id": "Elder Tree",
-        "region": "Main_map",
-        "location": {
-            "x": 500,
-            "y": 230
-        },
-        "routes": [
-            {
-                "id": "",
-                "temps": 0,
-                "bidirectionnel": false
-            }
-        ]
-    },
-        {
-        "id": "Mountain",
-        "region": "Main_map",
-        "location": {
-            "x": 600,
-            "y": 120
-        },
-        "routes": [
-            {
-                "id": "Cailidh",
-                "temps": 36,
-                "bidirectionnel": true
-            },
-          {
-            "id":"Auberge",
-            "temps":47,
-            "bidirectionnel":true
-          }
-        ]
-    },
-    {
-        "id": "Dawn of the world",
-        "region": "Main_map",
-        "location": {
-            "x": 450,
-            "y": 500
-        },
-        "routes": [
-            {
-                "id": "Auberge",
-                "temps": 21,
-                "bidirectionnel": true
-            }
-        ]
-    },
-    {
-        "id": "Auberge",
-        "region": "Main_map",
+        "id": "Casan Famhair",
+        "region": "Mountain",
         "location": {
             "x": 200,
             "y": 400
         },
         "routes": [
             {
-                "id": "Mountain",
-                "temps": 47,
+                "id": "Oz",
+                "temps": 5,
                 "bidirectionnel": true
-            },
-          {
-            "id":"Cailidh",
-            "temps":31,
-            "bidirectionnel":true
-          },
-          {
-            "id":"Dawn of the world",
-            "temps":21,
-            "bidirectionnel":true
-          },
-          {
-            "id":"Elder Tree",
-            "temps":21,
-            "bidirectionnel":false
-          }
+            }
         ]
     },
     {
-        "id": "Cailidh",
-        "region": "Main_map",
+        "id": "The Toucher",
+        "region": "Ceilidh",
         "location": {
-            "x": 660,
-            "y": 480
+            "x": 650,
+            "y": 150
         },
         "routes": [
             {
-                "id": "Mountain",
-                "temps": 36,
+                "id": "Old Castle",
+                "temps": 6,
+                "bidirectionnel": true
+            }
+        ]
+    },
+    {
+        "id": "Oz",
+        "region": "Mountain",
+        "location": {
+            "x": 500,
+            "y": 200
+        },
+        "routes": [
+            {
+                "id": "Casan Famhair",
+                "temps": 5,
+                "bidirectionnel": true
+            }
+        ]
+    },
+    {
+        "id": "Radahn, Consort of Joy",
+        "region": "Ceilidh",
+        "location": {
+            "x": 766,
+            "y": 350
+        },
+        "routes": [
+            {
+                "id": "Old Castle",
+                "temps": 2,
+                "bidirectionnel": true
+            }
+        ]
+    },
+    {
+        "id": "Old Castle",
+        "region": "Ceilidh",
+        "location": {
+            "x": 640,
+            "y": 570
+        },
+        "routes": [
+            {
+                "id": "Radahn, Consort of Joy",
+                "temps": 2,
                 "bidirectionnel": true
             },
           {
-            "id":"Auberge",
-            "temps":31,
-            "bidirectionnel":true
-          }
+            "id":"The Toucher",
+              "temps":6,
+              "bidirectionnel":true}
         ]
     }
 ]

@@ -47,15 +47,16 @@ class JSONLoader:
                 print(self.parent.__dict__)
                 region = self.parent.regions[region_nom]
                 region.lieux[id] = lieu
-                if lieu["entree"]:
-                    region.entree = id
+                if 'entree' in lieu.keys():
+                    if lieu["entree"]:
+                        region.entree = id
                 if id not in region.carte.sommet():
                     region.carte.ajout_sommet(id)
                 for route in lieu["routes"]:
                     if route["id"] not in region.carte.sommet():
                         region.carte.ajout_sommet(route["id"])
                     if route["bidirectionnel"]:
-                        region.carte.ajout_arrete(id, route["id"], route["temps"])
+                        region.carte.ajout_arete(id, route["id"], route["temps"])
                     else:
                         region.carte.ajout_arc(id, route["id"], route["temps"])
                 print(f"- Lieu chargé: {id}")
