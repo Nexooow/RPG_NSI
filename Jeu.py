@@ -2,6 +2,8 @@ import pygame
 import math
 import json
 
+from typing_extensions import NoDefault
+
 from lib.file import File
 from lib.graph import Graph
 
@@ -53,7 +55,6 @@ class Jeu:
             aretes,
             positions_sommets,
             True,
-            "background.webp"
         )
         self.lieux_visite = set()
         self.regions = {
@@ -83,21 +84,31 @@ class Jeu:
             return None
         return self.regions[self.region]
         
-    def demarrer (self, id: str, json = None):
+    def demarrer (self, id: str, json: dict | None = None):
         self.statut = "jeu"
         self.menu = None
         self.identifiant = id
-        self.joueur = Joueur(self, json)
-        self.executer_sequence("test")
-        print(self.joueur.save())
+        self.joueur = Joueur(self, json["joueur"] if json and "joueur" in json else None)
+        if json is not None: 
+            self.restaurer(json)
+        else:
+            self.region = "Auberge"
+            self.lieu = self.regions["Auberge"]
+            self.executer_sequence("test")
         self.save()
         
     def restaurer (self, json):
+        self.region = json["region"]
+        self.lieu = self.regions[self.region]
+        self.jour = json["jour"]
+        self.heure = json["heure"]
+        self.minute = json["minute"]
         if json["actions"]:
             for action in json["actions"]:
                 action_instance = self.loader.creer_action(action)
                 self.ajouter_action(action_instance)
-        if json["action_actuelle"]: self.action_actuelle = self.loader.creer_action(action)
+        if json["action_actuelle"]:
+            self.action_actuelle = self.loader.creer_action(json["action_actuelle"])
             
         
     def save (self):
@@ -201,4 +212,4 @@ class Jeu:
             if not (lieu == self.regions[region].entree):
                 deplacement_lieu = self.regions[region].carte.paths(self.regions[region].entree, lieu)
                 temps_deplacement += deplacement_lieu[1]
-        print(f"Temps de déplacement : {temps_deplacement} secondes")
+        print(f"Temps de déplacement : {temps_deplacement} heures")

@@ -62,10 +62,8 @@ class Selection (Action):
         self.option_choisie = 0
         
     def draw (self):
-        print(self.option_choisie)
         reversed_options = self.json["options"][::-1]
         for index, choix in enumerate(reversed_options):
-            print(index, choix)
             text_render_centered(
                 self.jeu.ui_surface,
                 str(choix["name"])+str(index),

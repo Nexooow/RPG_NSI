@@ -5,10 +5,17 @@ import pygame
 
 from lib.compatibility import get_canvas_buffer
 
+
 class Graph:
-    def __init__(
-        self, sommets=[], aretes=[], pos={}, orientation=False, image="background.webp"
-    ):
+    def __init__(self, sommets=None, aretes=None, pos=None, orientation=False):
+        # Avoid mutable default arguments by using None and creating new lists/dicts per instance
+        if sommets is None:
+            sommets = []
+        if aretes is None:
+            aretes = []
+        if pos is None:
+            pos = {}
+
         self.aretes = aretes
         if not orientation:
             self.aretes = [
@@ -19,7 +26,6 @@ class Graph:
         self.sommets = sommets
         self.pos = pos
         self.orientation = orientation
-        self.image = image
 
     def __str__(self):
         return f"Graph ({self.aretes}, {self.sommets}, {self.orientation})"
@@ -81,9 +87,10 @@ class Graph:
             G.add_edge(arrete[0], arrete[1], weight=arrete[2], label=arrete[2])
         return G
 
-    def affichage(self, screen):
-        img = plt.imread(f"assets/maps/{self.image}")
+    def affichage(self, screen, image):
+        img = plt.imread(f"assets/maps/{image}")
         G = self.get_graph()
+        print(len(self.sommets))
 
         fig, ax = plt.subplots(figsize=(10, 7))
         ax.imshow(img, extent=(0, 1000, 700, 0))

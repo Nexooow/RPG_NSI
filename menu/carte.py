@@ -1,3 +1,4 @@
+from matplotlib.backend_bases import LocationEvent
 import pygame
 from menu.Menu import Menu
 
@@ -16,13 +17,14 @@ class Carte (Menu):
                 if self.region is None: # graphe global
                     for region_name, region in self.jeu.regions.items():
                         region_position = region.position
-                        if pygame.Rect(region_position[0]-50, region_position[1]-50, 150, 150).collidepoint(position):
+                        if pygame.Rect((region_position[0]-50, region_position[1]-50, 150, 150)).collidepoint(position):
                             self.region = region_name
-                else:
+                else:   
                     region = self.jeu.regions[self.region]
                     for lieu_nom, lieu in region.lieux.items():
-                        lieu_position = lieu["position"]
-                        if pygame.Rect(lieu_position[0]-50, lieu_position[1]-50, 150, 150).collidepoint(position):
+                        location = lieu["location"]
+                        if pygame.Rect((location["x"]-50, location["y"]-50, 150, 150)).collidepoint(position):
+                            self.fermer()
                             self.jeu.deplacement(self.region, lieu_nom)
                         
     def fermer (self):
@@ -30,6 +32,6 @@ class Carte (Menu):
         
     def draw (self):
         if self.region is None:
-            self.jeu.carte.affichage(self.jeu.ui_surface)
+            self.jeu.carte.affichage(self.jeu.ui_surface, "background.webp")
         else:
             self.jeu.regions[self.region].afficher()

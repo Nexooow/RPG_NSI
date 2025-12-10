@@ -5,7 +5,8 @@ class Region:
     def __init__(self, jeu, nom, action_entree = None, action_sortie = None, image="background.webp"):
         self.jeu = jeu
         self.nom = nom
-        self.carte = Graph(image=image)
+        self.image = image
+        self.carte = Graph([], [], {}, False)
         self.lieux = {}
         self.entree = None
         self.position = self.jeu.carte.pos[self.nom]
@@ -13,7 +14,7 @@ class Region:
         self.action_sortie = action_sortie
         
     def afficher (self):
-        self.carte.affichage(self.jeu.ui_surface)
+        self.carte.affichage(self.jeu.ui_surface, self.image)
         
     def entrer (self):
         if self.nom not in self.jeu.lieux_visite:

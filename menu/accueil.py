@@ -47,15 +47,16 @@ class Accueil (Menu):
                         self.menu_selected_option = 2
                 elif event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE):
                     self.fermer()
-                    self.jeu.fade = 500
-                    sound = pygame.mixer.Sound(
-                        "./assets/sounds/accueil_clique.mp3")
-                    sound.set_volume(0.25)
-                    sound.play()
                     if self.menu_selected_option == 0:
+                        self.jeu.fade = 500
+                        sound = pygame.mixer.Sound(
+                            "./assets/sounds/accueil_clique.mp3")
+                        sound.set_volume(0.25)
+                        sound.play()
                         self.jeu.demarrer(str(uuid.uuid4()))
                     elif self.menu_selected_option == 1 and len(self.saves) > 0:
                         self.menu_selected_option = 0
+                        self.jeu.fade = 200
                         self.sous_page = "sauvegardes"
                         self.jeu.fade = 150
                     elif self.menu_selected_option == 2:
@@ -66,7 +67,7 @@ class Accueil (Menu):
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                     self.menu_selected_option -= 1
                     if self.menu_selected_option < 0:
-                        self.menu_selected_option = len(self.saves-1)
+                        self.menu_selected_option = len(self.saves)-1
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                     self.menu_selected_option += 1
                     if self.menu_selected_option == len(self.saves):
@@ -78,7 +79,9 @@ class Accueil (Menu):
                         "./assets/sounds/accueil_clique.mp3")
                     sound.set_volume(0.25)
                     sound.play()
-                    print(self.saves[self.menu_selected_option])
+                    partie_choisie = self.saves[self.menu_selected_option]
+                    assert isinstance(partie_choisie, dict)
+                    self.jeu.demarrer(partie_choisie["id"], partie_choisie)
 
     def draw_main(self):
 

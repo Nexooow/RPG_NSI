@@ -23,6 +23,7 @@ class JSONLoader:
             try:
                 with open(file, 'r') as f:
                     content = json.load(f)
+                    assert isinstance(content, dict)
                     id = content["id"]
                     type_sequence = content["type"]
                     if type_sequence in self.actions_types.keys():
@@ -34,24 +35,30 @@ class JSONLoader:
                         self.actions_sequences[id].append(
                             self.creer_action(action)
                         )
-                    print(f"- Sequence d'actions chargée: {id}")
             except Exception:
                 continue
         
     def charger_lieux (self):
         with open("./data/lieux.json", 'r') as f:
             content = json.load(f)
+            assert isinstance(content, list)
             for lieu in content:
+                
                 id = lieu["id"]
                 region_nom = lieu["region"]
-                print(self.parent.__dict__)
                 region = self.parent.regions[region_nom]
-                region.lieux[id] = lieu
-                if 'entree' in lieu.keys():
+                region.lieux[id] = lieu # ajoute le lieu à la région
+                
+                if 'entree' in lieu.keys(): # si le lieu est l'entrée de la région, l'indiquer
                     if lieu["entree"]:
                         region.entree = id
+                        
                 if id not in region.carte.sommet():
                     region.carte.ajout_sommet(id)
+                    
+                location = lieu["location"]
+                (x, y) = (int(location["x"]), int(location["y"]))
+                region.carte.ajout_position(id, (x, y))
                 for route in lieu["routes"]:
                     if route["id"] not in region.carte.sommet():
                         region.carte.ajout_sommet(route["id"])
@@ -59,7 +66,6 @@ class JSONLoader:
                         region.carte.ajout_arete(id, route["id"], route["temps"])
                     else:
                         region.carte.ajout_arc(id, route["id"], route["temps"])
-                print(f"- Lieu chargé: {id}")
         
     def recuperer_sequence (self, sequence_id):
         if sequence_id in self.actions_sequences.keys():
