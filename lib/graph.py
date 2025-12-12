@@ -85,7 +85,7 @@ class Graph:
             )
         return G
 
-    def paths(self, a, b) -> tuple[list[str], int]:
+    def paths(self, a, b):
         G = self.get_graph()
         chemin = list(nx.shortest_path(G, source=a, target=b, weight="weight"))
         poids = nx.shortest_path_length(G, source=a, target=b, weight="weight")

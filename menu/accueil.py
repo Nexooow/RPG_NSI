@@ -66,7 +66,7 @@ class Accueil(Menu):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                 self.menu_selected_option -= 1
-                if self.menu_selected_option < 0:
+                if self.menu_selected_option == -1:
                     self.menu_selected_option = len(self.saves) - 1
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                 self.menu_selected_option += 1

@@ -1,0 +1,12 @@
+{
+    "id": "action2",
+    "type": "negatif",
+    "run": [
+        {
+            "type": "dialogue",
+            "lines": [
+                "Action 2"
+            ]
+        }
+    ]
+}

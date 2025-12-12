@@ -2,8 +2,6 @@ import pygame
 import math
 import json
 
-from typing_extensions import NoDefault
-
 from lib.file import File
 from lib.graph import Graph
 
@@ -39,15 +37,16 @@ positions_sommets = {
     "Elder Tree": (500, 260),
 }
 
+
 class Jeu:
 
-    def __init__ (self):
-        
+    def __init__(self):
+
         self.running = True
-        self.statut = "accueil" # accueil/jeu/deplacement
+        self.statut = "accueil"  # accueil/jeu/deplacement
         self.menu = Accueil(self)
         self.clock = pygame.time.Clock()
-        
+
         self.fond = pygame.Surface((1000, 700), pygame.SRCALPHA)
         self.ui_surface = pygame.Surface((1000, 700), pygame.SRCALPHA)
         self.filter_surface = pygame.Surface((1000, 700), pygame.SRCALPHA)
@@ -60,45 +59,49 @@ class Jeu:
             positions_sommets
         )
         self.lieux_visite = set()
-        
+
         self.loader = JSONLoader(self)
         self.action_actuelle: Action | None = None
         self.actions = File()
-        
+
         self.regions = self.loader.charger_regions()
         self.region = None
         self.lieu = self.region.entree if self.region else None
-        
-        self.temps = 0
-        
+
+        self.temps = 24+12
+
         # filtres pour affichage
         self.fade = 300
-        
-    def obtenir_temps (self):
-        heures = self.temps // 60
+
+    def obtenir_temps(self):
+        print(f"temps: {self.temps}")
+        heures = self.temps
+        print(heures)
         jours = heures // 24
+        print(jours)
         heures %= 24
         return jours, heures
-        
-    def region_actuelle (self):
+
+    def region_actuelle(self):
         if self.region is None:
             return None
         return self.regions[self.region]
-        
-    def demarrer (self, id: str, json: dict | None = None):
+
+    def demarrer(self, id: str, json=None):
         self.statut = "jeu"
         self.menu = None
         self.identifiant = id
-        self.joueur = Joueur(self, json["joueur"] if json and "joueur" in json else None)
-        if json is not None: 
+        self.joueur = Joueur(
+            self, json["joueur"] if json and "joueur" in json else None)
+        if json is not None:
             self.restaurer(json)
         else:
             self.region = "Auberge"
             self.lieu = self.regions["Auberge"].entree
-            self.executer_sequence("test")
+            self.executer_sequence("debut")
         self.save()
-        
-    def restaurer (self, json):
+
+    def restaurer(self, json):
         self.region = json["region"]
         self.lieu = self.regions[self.region]
         self.temps = json["temps"]
@@ -107,50 +110,49 @@ class Jeu:
                 action_instance = self.loader.creer_action(action)
                 self.ajouter_action(action_instance)
         if json["action_actuelle"]:
-            self.action_actuelle = self.loader.creer_action(json["action_actuelle"])
-            
-        
-    def save (self):
+            self.action_actuelle = self.loader.creer_action(
+                json["action_actuelle"])
+
+    def save(self):
         data = {
             "id": self.identifiant,
             "joueur": self.joueur.save(),
             "temps": self.temps
         }
         json.dump(data, open(f"./saves/{self.identifiant}.json", "w"))
-        
-    
-    def quitter (self):
+
+    def quitter(self):
         self.running = False
-        
-    def gerer_evenement (self, evenements):
+
+    def gerer_evenement(self, evenements):
         if self.menu is not None:
             self.menu.update(evenements)
         if self.statut == "jeu":
             for event in evenements:
                 if self.menu is None:
-                    if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+                    if event.type == pygame.KEYDOWN and event.key == pygame.K_m and self.action_actuelle is None:
                         self.ouvrir_menu(Carte(self))
             if self.action_actuelle is not None:
                 self.action_actuelle.update(evenements)
-            
-    def ajouter_action (self, action):
-        assert isinstance(action, Action)
+
+    def ajouter_action(self, action):
+        assert isinstance(action, Action), f"type de l'action: {type(action)}"
         self.actions.enfiler(action)
-        
-    def executer_sequence (self, id):
+
+    def executer_sequence(self, id):
         sequence = self.loader.recuperer_sequence(id)
         if sequence:
             for action in sequence:
                 self.ajouter_action(action)
-    
-    def fermer_menu (self):
+
+    def fermer_menu(self):
         self.menu = None
-                
-    def ouvrir_menu (self, menu):
+
+    def ouvrir_menu(self, menu):
         self.menu = menu
         self.menu.ouvrir()
-            
-    def executer (self):
+
+    def executer(self):
         action = self.action_actuelle
         if action is None:
             if not self.actions.est_vide():
@@ -165,8 +167,8 @@ class Jeu:
                     self.action_actuelle.executer()
                 else:
                     self.action_actuelle = None
-                    
-    def scene (self):
+
+    def scene(self):
         if self.menu is not None:
             self.menu.draw()
         elif self.statut == "jeu":
@@ -174,20 +176,19 @@ class Jeu:
             if self.action_actuelle is not None:
                 self.action_actuelle.draw()
             self.ui()
-        self.filters() # applique les filtres sur l'écran
-        
-        
-    def ui (self):
-        if self.action_actuelle is not None:
-            if not self.action_actuelle.desactive_ui:
-                (jour, heure) = self.obtenir_temps()
-                # écris le temps en haut à gauche
-                pygame.draw.rect(self.fond, (0, 0, 255), (8, 8, 90, 90))
-                pygame.draw.rect(self.fond, (255, 0, 0), (8+90/2, 8+90/2, 5, 5))
-                text_render_centered_left(self.ui_surface, f"Jour {jour} | {heure}h", "regular", pos=(10, 8+90/2))
+        self.filters()  # applique les filtres sur l'écran
 
-        
-    def filters (self):
+    def ui(self):
+        if not self.action_actuelle or (self.action_actuelle and not self.action_actuelle.desactive_ui):
+                (jour, heure) = self.obtenir_temps()
+                print(self.obtenir_temps())
+                # écris le temps en haut à gauche
+                pygame.draw.rect(self.fond, (245, 205, 0), (7, 7, 302, 92))
+                pygame.draw.rect(self.fond, (36, 33, 32, 225), (8, 8, 300, 90))
+                text_render_centered_left(
+                    self.ui_surface, f"Jour {jour} | {heure}h", "imregular", pos=(16, 8+90/2), color=(255, 255, 255))
+
+    def filters(self):
         if self.fade > 0:
             if self.fade < 10:
                 self.fade = 2
@@ -197,41 +198,49 @@ class Jeu:
                 self.filter_surface.get_rect()
             )
             self.fade -= 2
-        
-    def ajouter_temps (self, heures):
-        self.heure += heures
-        if self.heure >= 24:
-            self.jour += self.heure // 24
-            self.heure %= 24
-        
-    def deplacement (self, region, lieu):
+
+    def deplacement(self, region, lieu):
 
         region_actuelle = self.region_actuelle()
         assert region_actuelle is not None
         temps_deplacement = 0
-        
+
         print(f"deplacement vers {region}/{lieu}")
         print(f"depuis {region_actuelle.nom}/{self.lieu}")
-        
-        if region != region_actuelle.nom: # destination dans une autre région
-            
-            if self.lieu != region_actuelle.entree: # se déplacer d'abord vers l'entrée de la région pour en sortir
-                temps_deplacement += region_actuelle.carte.paths(self.lieu, region_actuelle.entree)[1]
-                
-            temps_deplacement += self.carte.paths(region_actuelle.nom, region)[1]
-            
+
+        if region != region_actuelle.nom:  # destination dans une autre région
+
+            if self.lieu != region_actuelle.entree:  # se déplacer d'abord vers l'entrée de la région pour en sortir
+                temps_deplacement += region_actuelle.carte.paths(
+                    self.lieu, region_actuelle.entree)[1]
+
+            temps_deplacement += self.carte.paths(
+                region_actuelle.nom, region)[1]
+
             region_destination = self.regions[region]
             if lieu != region_destination.entree:
                 # si le lieu de destination n'est pas l'entrée de la région
                 # s'y déplacer.
-                temps_deplacement += region_destination.carte.paths(region_destination.entree, lieu)[1]
-            
-        else: # si le lieu de destination est dans la région actuelle
-            
+                temps_deplacement += region_destination.carte.paths(
+                    region_destination.entree, lieu)[1]
+
+        else:  # si le lieu de destination est dans la région actuelle
+
             chemin = self.carte.paths(self.lieu, lieu)
             temps_deplacement += chemin[1]
-        
+
+        for heure in range(temps_deplacement):
+            print(heure)
+            sequence = self.loader.tirer_action(
+                self.joueur.chance, self.joueur.malchance)
+            print("sequence: ", sequence)
+            if sequence is not None:
+                self.executer_sequence(sequence)
+            # TODO: chance différente selon la région
+
         print(f"temps du trajet : {temps_deplacement}")
-        
+        self.temps += temps_deplacement
+        print(self.temps)
+
         self.lieu = lieu
         self.region = region

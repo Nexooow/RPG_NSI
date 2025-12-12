@@ -6,9 +6,13 @@ class Joueur:
             self.vie = json["vie"]
             self.inventaire = json["inventaire"]
             self.equipment = json["equipment"]
+            self.chance = json["chance"]
+            self.malchance = json["malchance"]
         else:
             self.vie_max = 100
             self.vie = 100
+            self.chance = 25
+            self.malchance = 10
             self.inventaire = {}
             self.equipment = {
                 "main": None,

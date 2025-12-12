@@ -10,9 +10,6 @@ class Action:
         self.json = json
         self.desactive_ui = False
 
-    def __repr__(self):
-        return str(self.json)
-
     def draw(self):
         """
         Méthode pour dessiner l'action sur l'écran.
@@ -44,7 +41,8 @@ class Dialogue(Action):
         self.frame_relative = -100  # -100 = "l'action" est en train d'être démarrée, 0 = "l'action" est en cours d'exécution, 100 = "l'action" est terminée
 
     def draw(self):
-        pygame.draw.rect(self.jeu.ui_surface, (0, 0, 0, 15), (16, 650-(len(self.json["lines"])*26), 1000-32, 650))
+        pygame.draw.rect(self.jeu.ui_surface, (0, 0, 0, 15), (0, 675-(len(self.json["lines"])*26), 1000, 650))
+        pygame.draw.rect(self.jeu.ui_surface, (0, 0, 0, 110), (0, 675-(len(self.json["lines"])*26), 1000, 1))
         for index, line in enumerate(self.json["lines"]):
             text_render_centered(
                 self.jeu.ui_surface,
@@ -61,7 +59,8 @@ class Dialogue(Action):
                 self.complete = True
 
     def executer(self):
-        self.frame_relative = -100
+        #self.frame_relative = -100
+        pass
 
 
 class Selection(Action):
@@ -70,24 +69,48 @@ class Selection(Action):
         self.option_choisie = 0
 
     def draw(self):
-        reversed_options = self.json["options"][::-1]
-        for index, choix in enumerate(reversed_options):
+        options = self.json["options"]
+        for index, choix in enumerate(options):
             text_render_centered(
                 self.jeu.ui_surface,
-                str(choix["name"]) + str(index),
-                "regular",
-                pos=(1000 / 2, 650 - (50 * index)),
+                choix["name"],
+                "imregular",
+                pos=(1000 / 2, 675 - (26 * index)),
                 underline=index == self.option_choisie,
+                size=28
             )
         text_render_centered(
             self.jeu.ui_surface,
             self.json["question"],
-            "bold",
-            pos=(1000 / 2, 650 - (50 * len(reversed_options))),
+            "imregular",
+            pos=(1000 / 2, 675- (26 * len(options)-1)),
+            size=28
         )
 
     def update(self, events):
-        pass
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                if self.option_choisie != len(self.json["options"])-1:
+                    self.option_choisie += 1
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                if self.option_choisie != 0:
+                    self.option_choisie -= 1
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.complete = True
+                valeur = self.json["options"][self.option_choisie]["valeur"]
+                print(self.json["actions"][valeur])
 
     def executer(self):
+        self.option_choisie = 0
+    
+class SelectionAction (Action):
+    
+    def __init__ (self, jeu):
+        super().__init__(jeu)
+        self.option_choisie = 0
+        
+    def update (self, events):
+        pass
+    
+    def draw (self, t):
         pass

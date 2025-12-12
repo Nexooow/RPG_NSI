@@ -32,9 +32,13 @@ class JSONLoader:
                         self.actions_types[type_sequence] = [id]
                     self.actions_sequences[id] = []
                     for action in content["run"]:
+                        print("parsing ", action)
                         self.actions_sequences[id].append(self.creer_action(action))
+                    print("created action ", self.actions_sequences[id])
             except Exception:
+                print("une erreur est survenue lors du chargement de la séquence ", file)
                 continue
+        print(self.actions_sequences)
 
     def charger_regions(self):
         lieux_json = self.charger_lieux()
@@ -61,6 +65,16 @@ class JSONLoader:
             content = json.load(f)
             assert isinstance(content, list)
             return content
+        
+    def charger_npcs (self):
+        files = glob.glob("./data/actions/*.json")
+        for file in files:
+            try:
+                with open(file) as f:
+                    content = json.load(f)
+                    assert isinstance(content, dict)
+            except Exception:
+                continue;
 
     def recuperer_sequence(self, sequence_id):
         if sequence_id in self.actions_sequences.keys():
@@ -80,19 +94,17 @@ class JSONLoader:
             positive_part = ((chance - chance_negative) / 0.75) + chance_negative
             rand = random() * 100
             if rand <= chance_negative:
-                pass
-                # index = randint(0, len(self.evenements_negatifs))
-                # key = self.evenements_negatifs[index]
-                # return self.actions[key]
+                events_negatif = self.actions_types["negatif"]
+                index = randint(0, len(events_negatif)-1)
+                key = events_negatif[index]
             if rand >= positive_part:
-                pass
-                # index = randint(0, len(self.evenements_positifs))
-                # key = self.evenements_positifs[index]
-                # return self.actions[key]
+                events_positifs = self.actions_types["positif"]
+                index = randint(0, len(events_positifs)-1)
+                key = events_positifs[index]
             else:
-                pass
-                # index = randint(0, len(self.evenements_positifs))
-                # key = self.evenements_positifs[index]
-                # return self.actions[key]
+                events_neutre = self.actions_types["neutre"]
+                index = randint(0, len(events_neutre)-1)
+                key = events_neutre[index]
+            return key
         else:
             return None

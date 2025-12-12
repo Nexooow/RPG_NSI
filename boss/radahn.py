@@ -34,8 +34,9 @@ class Radahn(Action):
         self.start_time = time()
         self.radahn_frame_index = 0
         pygame.mixer.music.set_volume(100)
-        pygame.mixer.music.load('./assets/music/survive.mp3')
+        pygame.mixer.music.load('./assets/music/survive.mp4')
         pygame.mixer.music.play()
+    
     def update(self, events):
         pass
 
