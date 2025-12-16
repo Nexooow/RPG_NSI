@@ -14,7 +14,7 @@ class Fighter:
         self.update_time = pygame.time.get_ticks()
         self.rect = pygame.Rect(
             (x, y, self.size/8*self.image_scale, hitbox_height))
-        self.bubble = pygame.image.load('blocking.png')
+        self.bubble = pygame.image.load('./assets/sprites/blocking.png')
         self.x = x
         self.y = y
         self.running = False

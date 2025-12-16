@@ -6,7 +6,7 @@ from lib.file import File
 from lib.graph import Graph
 
 from boss.radahn import Radahn
-from boss.demiurge import Fighter
+from boss.street_fighter import StreetFighter
 
 from lib.render import text_render_centered, text_render_centered_left, text_render_centered_up
 from menu.carte import Carte
@@ -100,7 +100,7 @@ class Jeu:
             self.region = "Auberge"
             self.lieu = self.regions["Auberge"].entree
             self.executer_sequence("debut")
-        self.executer(Fighter(self))
+        self.executer(StreetFighter(self))
         self.save()
 
     def restaurer(self, json):
