@@ -1,11 +1,9 @@
-import glob
+from glob import glob
 import json
-import os
 from random import randint, random
 
 from Action import Dialogue, Selection
 from Region import Region
-
 
 class JSONLoader:
     def __init__(self, parent):
@@ -18,7 +16,7 @@ class JSONLoader:
         self.charger_regions()
 
     def charger_actions(self):
-        files = glob.glob("./data/actions/*.json")
+        files = glob("./data/actions/**/*.json", recursive=True)
         for file in files:
             try:
                 with open(file, "r", encoding="utf-8") as f:
@@ -65,14 +63,14 @@ class JSONLoader:
             return content
         
     def charger_npcs (self):
-        files = glob.glob("./data/actions/*.json")
+        files = glob("./data/actions/**/*.json", recursive=True)
         for file in files:
             try:
                 with open(file) as f:
                     content = json.load(f)
                     assert isinstance(content, dict)
             except Exception:
-                continue;
+                continue
 
     def recuperer_sequence(self, sequence_id):
         if sequence_id in self.actions_sequences.keys():

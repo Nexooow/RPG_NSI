@@ -1,10 +1,6 @@
-import base64
 import math
-from io import BytesIO
 from random import randint
-
 import pygame
-
 
 class Meteor:
     def __init__(self, center, image=None, frame_index=0, object_density=3000.0):
@@ -69,7 +65,7 @@ class Meteor:
     def load_frames(self, frame_width=448, frame_height=448):
         frames = []
         sheet_width = self.image.get_width()
-        sheet_height = self.image.get_height()
+        # sheet_height = self.image.get_height()
         num_frames = sheet_width // frame_width
         for i in range(num_frames):
             frame = self.image.subsurface(

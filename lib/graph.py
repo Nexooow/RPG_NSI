@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from numpy.random.mtrand import f
 import pygame
 
 from lib.compatibility import get_canvas_buffer

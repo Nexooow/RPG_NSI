@@ -1,6 +1,4 @@
-from types import LambdaType
 from lib.graph import Graph, affichage_graphe
-
 
 class Region:
     def __init__(self, jeu, nom, lieux, image="background.webp"):

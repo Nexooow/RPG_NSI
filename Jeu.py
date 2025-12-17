@@ -1,21 +1,16 @@
 import pygame
-import math
 import json
 
 from lib.file import File
 from lib.graph import Graph
 
-from boss.radahn import Radahn
-from boss.street_fighter import StreetFighter
-
-from lib.render import text_render_centered, text_render_centered_left, text_render_centered_up
+from lib.render import text_render_centered_left
 from menu.carte import Carte
 from menu.accueil import Accueil
 
 from Action import Action
 from JSONLoader import JSONLoader
 from Joueur import Joueur
-from Region import Region
 
 sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
 aretes = [
@@ -37,7 +32,6 @@ positions_sommets = {
     "Dawn of the world": (450, 500),
     "Elder Tree": (500, 260),
 }
-
 
 class Jeu:
 

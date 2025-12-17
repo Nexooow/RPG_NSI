@@ -29,8 +29,16 @@ class Dialogue(Action):
         self.frame_relative = -100  # -100 = "l'action" est en train d'être démarrée, 0 = "l'action" est en cours d'exécution, 100 = "l'action" est terminée
 
     def draw(self):
-        pygame.draw.rect(self.jeu.ui_surface, (0, 0, 0, 15), (0, 675-(len(self.json["lines"])*26), 1000, 650))
-        pygame.draw.rect(self.jeu.ui_surface, (0, 0, 0, 110), (0, 675-(len(self.json["lines"])*26), 1000, 1))
+        pygame.draw.rect(
+            self.jeu.ui_surface,
+            (0, 0, 0, 15),
+            (0, 675 - (len(self.json["lines"]) * 26), 1000, 650),
+        )
+        pygame.draw.rect(
+            self.jeu.ui_surface,
+            (0, 0, 0, 110),
+            (0, 675 - (len(self.json["lines"]) * 26), 1000, 1),
+        )
         for index, line in enumerate(self.json["lines"]):
             text_render_centered(
                 self.jeu.ui_surface,
@@ -47,7 +55,6 @@ class Dialogue(Action):
                 self.complete = True
 
     def executer(self):
-        #self.frame_relative = -100
         pass
 
 
@@ -65,20 +72,20 @@ class Selection(Action):
                 "imregular",
                 pos=(1000 / 2, 675 - (26 * index)),
                 underline=index == self.option_choisie,
-                size=28
+                size=28,
             )
         text_render_centered(
             self.jeu.ui_surface,
             self.json["question"],
             "imregular",
-            pos=(1000 / 2, 675- (26 * len(options)-1)),
-            size=28
+            pos=(1000 / 2, 675 - (26 * len(options) - 1)),
+            size=28,
         )
 
     def update(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                if self.option_choisie != len(self.json["options"])-1:
+                if self.option_choisie != len(self.json["options"]) - 1:
                     self.option_choisie += 1
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                 if self.option_choisie != 0:
@@ -90,15 +97,13 @@ class Selection(Action):
 
     def executer(self):
         self.option_choisie = 0
+
+
+class Damage (Action):
     
-class SelectionAction (Action):
+    def __init__ (self, jeu, json):
+        super().__init__(jeu, json)
     
-    def __init__ (self, jeu):
-        super().__init__(jeu)
-        self.option_choisie = 0
-        
-    def update (self, events):
-        pass
-    
-    def draw (self):
-        pass
+    def executer (self):
+        self.jeu.joueur.infliger(self.json["degats"])
+        self.complete = True

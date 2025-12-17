@@ -11,7 +11,6 @@ from sprites.Meteor import Meteor
 def display_frames(image, frame_width, frame_height):
     frames = []
     sheet_width = image.get_width()
-    sheet_height = image.get_height()
     num_frames = sheet_width // frame_width
     for i in range(num_frames):
         frame = image.subsurface((i * frame_width, 0, frame_width, frame_height))

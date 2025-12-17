@@ -1,9 +1,4 @@
-import base64
-from io import BytesIO
-
 import pygame
-from pygame.locals import *
-
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, x, y, size):

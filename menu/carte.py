@@ -1,4 +1,3 @@
-from matplotlib.backend_bases import LocationEvent
 import pygame
 from lib.graph import affichage_graphe
 from menu.Menu import Menu

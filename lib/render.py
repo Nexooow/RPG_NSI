@@ -1,19 +1,18 @@
 import pygame
 
+# mettre en "cache" les polices pour optimiser les performances
+fonts = {}
 
-def font_render(text, font, color=(0, 0, 0), size=None):
-    if font == "extrabold":
-        font = pygame.font.Font("./assets/fonts/CinzelDecorative-Black.ttf", size or 56)
-    elif font == "bold":
-        font = pygame.font.Font("./assets/fonts/CinzelDecorative-Bold.ttf", size or 48)
-    elif font == "regular":
-        font = pygame.font.Font("./assets/fonts/CinzelDecorative-Regular.ttf", size or 36)
-    elif font == "imitalic":
-        font = pygame.font.Font("./assets/fonts/IMFellDoublePica-Italic.ttf", size or 36)
+def font_render(text, fontName, color=(0, 0, 0), size=None):
+    global fonts
+    key = f"{fontName}_{size or 36}"
+    if key in fonts:
+        font = fonts[key]
     else:
         font = pygame.font.Font(
-            "./assets/fonts/IMFellDoublePica-Regular.ttf", size or 36
+            f"./assets/fonts/{fontName}.ttf", size or 36
         )
+        fonts[key] = font
     return font.render(text, True, color)
 
 
