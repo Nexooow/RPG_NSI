@@ -1,7 +1,7 @@
 import pygame
 from Action import Action
 
-from boss.demiurge import Fighter
+from sprites.demiurge import Fighter
 
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
@@ -47,9 +47,9 @@ class StreetFighter (Action):
         self.draw_bg()
         self.draw_health(self.player.health, 20, 20)
         self.draw_health(self.demiurge.health, 500, 20)
-        self.demiurge.draw(self.fond)
+        self.demiurge.draw(self.jeu.fond)
 
-    def update(self):
+    def update (self, events):
         self.player.move(1000, 700, self.jeu.fond, self.demiurge)
         self.demiurge.move(1000, 700, self.jeu.fond, self.player, False)
         self.demiurge.ai_behavior(self.jeu.fond, self.player)

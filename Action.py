@@ -11,27 +11,15 @@ class Action:
         self.desactive_ui = False
 
     def draw(self):
-        """
-        Méthode pour dessiner l'action sur l'écran.
-        Retourne une erreur si la méthode n'est pas implémentée.
-        """
-        raise NotImplementedError("La méthode draw n'est pas implémentée")
+        pass
 
     def update(self, events):
-        """
-        Méthode pour dessiner l'action sur l'écran.
-        Retourne une erreur si la méthode n'est pas implémentée.
-        """
-        raise NotImplementedError("La méthode update n'est pas implémentée")
+        pass
 
     def executer(self):
-        """
-        Méthode pour dessiner l'action sur l'écran.
-        Retourne une erreur si la méthode n'est pas implémentée.
-        """
-        raise NotImplementedError("La méthode executer n'est pas implémentée")
+        pass
 
-    def est_complete(self):
+    def get_complete(self):
         return self.complete
 
 
@@ -112,5 +100,5 @@ class SelectionAction (Action):
     def update (self, events):
         pass
     
-    def draw (self, t):
+    def draw (self):
         pass

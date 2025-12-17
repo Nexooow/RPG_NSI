@@ -21,7 +21,7 @@ class JSONLoader:
         files = glob.glob("./data/actions/*.json")
         for file in files:
             try:
-                with open(file, "r") as f:
+                with open(file, "r", encoding="utf-8") as f:
                     content = json.load(f)
                     assert isinstance(content, dict)
                     id = content["id"]
@@ -32,13 +32,11 @@ class JSONLoader:
                         self.actions_types[type_sequence] = [id]
                     self.actions_sequences[id] = []
                     for action in content["run"]:
-                        print("parsing ", action)
                         self.actions_sequences[id].append(self.creer_action(action))
-                    print("created action ", self.actions_sequences[id])
-            except Exception:
+            except Exception as e:
                 print("une erreur est survenue lors du chargement de la séquence ", file)
+                print(e)
                 continue
-        print(self.actions_sequences)
 
     def charger_regions(self):
         lieux_json = self.charger_lieux()

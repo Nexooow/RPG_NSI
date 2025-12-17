@@ -75,11 +75,8 @@ class Jeu:
         self.fade = 300
 
     def obtenir_temps(self):
-        print(f"temps: {self.temps}")
         heures = self.temps
-        print(heures)
         jours = heures // 24
-        print(jours)
         heures %= 24
         return jours, heures
 
@@ -99,8 +96,7 @@ class Jeu:
         else:
             self.region = "Auberge"
             self.lieu = self.regions["Auberge"].entree
-            self.executer_sequence("debut")
-        self.executer(StreetFighter(self))
+            self.executer_sequence("demo_ameliorations")
         self.save()
 
     def restaurer(self, json):
@@ -162,7 +158,7 @@ class Jeu:
                 assert self.action_actuelle is not None
                 self.action_actuelle.executer()
         else:
-            if action.est_complete():
+            if action.get_complete():
                 if not self.actions.est_vide():
                     self.action_actuelle = self.actions.defiler()
                     assert self.action_actuelle is not None
@@ -183,7 +179,6 @@ class Jeu:
     def ui(self):
         if not self.action_actuelle or (self.action_actuelle and not self.action_actuelle.desactive_ui):
                 (jour, heure) = self.obtenir_temps()
-                print(self.obtenir_temps())
                 # écris le temps en haut à gauche
                 pygame.draw.rect(self.fond, (245, 205, 0), (7, 7, 302, 92))
                 pygame.draw.rect(self.fond, (36, 33, 32, 225), (8, 8, 300, 90))
@@ -232,10 +227,8 @@ class Jeu:
             temps_deplacement += chemin[1]
 
         for heure in range(temps_deplacement):
-            print(heure)
             sequence = self.loader.tirer_action(
                 self.joueur.chance, self.joueur.malchance)
-            print("sequence: ", sequence)
             if sequence is not None:
                 self.executer_sequence(sequence)
             # TODO: chance différente selon la région
