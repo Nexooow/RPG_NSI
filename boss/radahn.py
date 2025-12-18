@@ -7,6 +7,7 @@ from Action import Action
 from lib.render import text_render_centered_up
 from sprites.Explosion import Explosion
 from sprites.Meteor import Meteor
+from sprites.Demiurge import Fighter
 
 
 def display_frames(image, frame_width, frame_height):
@@ -17,11 +18,19 @@ def display_frames(image, frame_width, frame_height):
         frame = image.subsurface((i * frame_width, 0, frame_width, frame_height))
         frames.append(frame)
     return frames
+def draw_health(screen,health,x,y):
+    ratio=health/100
+    pygame.draw.rect(screen,(255,255,255),(x-2,y-2,404,34))
+    pygame.draw.rect(screen,(255,0,0),(x,y,400,30))
+    pygame.draw.rect(screen,(0,255,255),(x,y,400*ratio,30))
 
 
 background = pygame.image.load("./assets/sprites/radahn_fightzone.jpg")
 half_radahn = pygame.image.load("./assets/sprites/radahn.png")
 radahn_frames = display_frames(half_radahn, 1422 // 2, 1600 // 3)
+player_sheet=pygame.image.load("./assets/sprites/warrior.png")
+player=Fighter(500,480,[162,1,[72,56]],player_sheet,[10,8,1,7,7,3,7],hitbox_height=162)
+
 
 
 class Radahn(Action):
@@ -51,13 +60,15 @@ class Radahn(Action):
                 border = choice([25, 910])
                 self.meteors.append(Meteor((border, randint(-25, 150))))
         self.jeu.fond.blit(background, (0, 0))
-
+        draw_health(self.jeu.fond,player.health,20,600)
+        player.move(1000,700,self.jeu.fond,target=None)
         self.jeu.fond.blit(radahn_frames[self.radahn_frame_index], (150, 40))
         self.radahn_frame_index = (self.radahn_frame_index + 1) % len(radahn_frames)
         for meteor in self.meteors:
             meteor.deplace()
             meteor.frame_index = (meteor.frame_index + 1) % len(meteor.frames)
-            if meteor.rect.bottom >= 480:
+            meteor.collision(player)
+            if meteor.rect.bottom >= 500:
                 self.meteors.remove(meteor)
                 explosion = Explosion(
                     meteor.rect.center[0], meteor.rect.center[1], meteor.size
@@ -65,6 +76,8 @@ class Radahn(Action):
                 self.explosion_group.add(explosion)
             else:
                 self.jeu.fond.blit(meteor.frame, meteor.rect)
+        player.update()
+        player.draw(screen)
         self.explosion_group.draw(self.jeu.fond)
         self.explosion_group.update()
         text_render_centered_up(
