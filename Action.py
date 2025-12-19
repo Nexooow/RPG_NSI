@@ -17,7 +17,7 @@ class Action:
         pass
 
     def executer(self):
-        pass
+        self.complete = False
 
     def get_complete(self):
         return self.complete
@@ -93,7 +93,7 @@ class Dialogue(Action):
                 self.complete = True
 
     def executer(self):
-        pass
+        super().executer()
 
 
 class Selection(Action):
@@ -168,16 +168,6 @@ class Selection(Action):
 
             current_y += line_height
 
-        instruction_y = box_y + total_height + 30
-        text_render_centered(
-            self.jeu.ui_surface,
-            "↑↓ pour naviguer - ESPACE pour sélectionner",
-            "imregular",
-            color=(150, 150, 150),
-            pos=(500, instruction_y),
-            size=18,
-        )
-
     def update(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
@@ -192,6 +182,7 @@ class Selection(Action):
                 print(self.json["actions"][valeur])
 
     def executer(self):
+        super().executer()
         self.option_choisie = 0
 
 
@@ -200,5 +191,17 @@ class Damage(Action):
         super().__init__(jeu, json)
 
     def executer(self):
+        super().executer()
         self.jeu.joueur.infliger(self.json["degats"])
         self.complete = True
+
+class AjoutTemps(Action):
+    
+    def __init__ (self, jeu, json):
+        super().__init__(jeu, json)
+    
+    def executer(self):
+        super().executer()
+        self.jeu.temps += self.json["temps"]
+        self.complete = True
+        

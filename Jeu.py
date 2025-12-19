@@ -10,6 +10,7 @@ from lib.graph import Graph
 from lib.render import text_render_centered
 from menu.accueil import Accueil
 from menu.carte import Carte
+from boss.radahn import Radahn
 
 sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
 aretes = [
@@ -85,6 +86,7 @@ class Jeu:
             self.region = "Auberge"
             self.lieu = self.regions["Auberge"].entree
             self.executer_sequence("debut")
+            self.ajouter_action(Radahn(self))
         self.save()
 
     def restaurer(self, json):

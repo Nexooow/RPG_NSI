@@ -7,7 +7,7 @@ from Action import Action
 from lib.render import text_render_centered_up
 from sprites.Explosion import Explosion
 from sprites.Meteor import Meteor
-from sprites.Demiurge import Fighter
+from sprites.demiurge import Fighter
 
 
 def display_frames(image, frame_width, frame_height):
@@ -45,14 +45,14 @@ class Radahn(Action):
         self.start_time = time()
         self.radahn_frame_index = 0
         pygame.mixer.music.set_volume(100)
-        pygame.mixer.music.load("./assets/music/survive.mp4")
+        pygame.mixer.music.load("./assets/music/survive.mp3")
         pygame.mixer.music.play()
 
     def update(self, events):
         pass
 
     def draw(self):
-        this = randint(1, 200)
+        this = randint(1, 275)
         if len(self.meteors) < 10 and this <= 10:
             if this > 3:
                 self.meteors.append(Meteor((randint(25, 910), -25)))
@@ -68,6 +68,7 @@ class Radahn(Action):
             meteor.deplace()
             meteor.frame_index = (meteor.frame_index + 1) % len(meteor.frames)
             meteor.collision(player)
+            pygame.draw.circle(self.jeu.fond, (255, 0, 0), meteor.rect.center, int(meteor.radiuspx), 1)
             if meteor.rect.bottom >= 500:
                 self.meteors.remove(meteor)
                 explosion = Explosion(
@@ -77,7 +78,8 @@ class Radahn(Action):
             else:
                 self.jeu.fond.blit(meteor.frame, meteor.rect)
         player.update()
-        player.draw(screen)
+        player.draw(self.jeu.fond)
+        pygame.draw.circle(self.jeu.fond, (0, 255, 0), player.rect.center, int(player.radiuspx), 1)
         self.explosion_group.draw(self.jeu.fond)
         self.explosion_group.update()
         text_render_centered_up(

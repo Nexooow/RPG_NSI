@@ -49,8 +49,9 @@ class Accueil(Menu):
                 self.fermer()
                 if self.menu_selected_option == 0:
                     self.jeu.fade = 500
-                    sound = pygame.mixer.Sound("./assets/sounds/accueil_clique.mp3")
-                    sound.set_volume(0.25)
+                    sound = pygame.mixer.Sound(
+                        "./assets/sounds/accueil_clique.mp3")
+                    sound.set_volume(0.10)
                     sound.play()
                     self.jeu.demarrer(str(uuid.uuid4()))
                 elif self.menu_selected_option == 1 and len(self.saves) > 0:
@@ -75,7 +76,8 @@ class Accueil(Menu):
             elif event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE):
                 self.fermer()
                 self.jeu.fade = 1000
-                sound = pygame.mixer.Sound("./assets/sounds/accueil_clique.mp3")
+                sound = pygame.mixer.Sound(
+                    "./assets/sounds/accueil_clique.mp3")
                 sound.set_volume(0.25)
                 sound.play()
                 partie_choisie = self.saves[self.menu_selected_option]
@@ -87,7 +89,8 @@ class Accueil(Menu):
             if event.type == pygame.KEYDOWN and (
                 event.key == pygame.K_UP or event.key == pygame.K_DOWN
             ):
-                pygame.mixer.Sound("./assets/sounds/menu-selection.mp3").play().set_volume(0.01)
+                pygame.mixer.Sound(
+                    "./assets/sounds/menu-selection.mp3").play().set_volume(0.01)
         if self.sous_page == "main":
             self.update_page_main(events)
         elif self.sous_page == "sauvegardes":
@@ -164,11 +167,13 @@ class Accueil(Menu):
             particule_position = random.randint(0, 1000)
             particule_taille = random.randint(1, 2)
             alpha = random.randint(80, 225)
-            self.particules.append(([particule_position, 700], alpha, particule_taille))
+            self.particules.append(
+                ([particule_position, 700], alpha, particule_taille))
 
         for particle in self.particules:
             pygame.draw.circle(
-                self.jeu.fond, (245, 205, 0, particle[1]), particle[0], particle[2]
+                self.jeu.fond, (245, 205, 0,
+                                particle[1]), particle[0], particle[2]
             )
             particle[0][1] -= 0.25
             if particle[0][1] < 0:

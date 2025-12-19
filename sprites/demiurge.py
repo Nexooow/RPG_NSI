@@ -62,7 +62,7 @@ class Fighter:
                 
                 if key[pygame.K_a]:
                     self.blocking = True
-                if key[pygame.K_e] and self.dash_cooldwon==0:
+                if key[pygame.K_e] and self.dash_cooldown==0:
                     self.dash=True
                     dx= dx-speed*30 if self.flip else dx+speed*30
                     self.dash_cooldown=300

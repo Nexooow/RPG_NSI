@@ -2,9 +2,11 @@ import math
 from random import randint
 import pygame
 
+
 class Meteor:
     def __init__(self, center, image=None, frame_index=0, object_density=3000.0):
-        self.image = pygame.image.load("./assets/sprites/meteor.png").convert_alpha()
+        self.image = pygame.image.load(
+            "./assets/sprites/meteor.png").convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.center = center
         self.point_of_fall = center
@@ -29,6 +31,7 @@ class Meteor:
         self.frame = self.frames[0]
         self.frame_index = frame_index
         self.radius = self.frames[0].get_width() * self.mps / 2.0
+        self.radiuspx = self.frames[0].get_width() // 3.0
         self.surface = math.pi * self.radius**2
         self.mass = (
             self.meteor_density * (4.0 / 3.0) * math.pi * (self.radius**3)
@@ -36,6 +39,7 @@ class Meteor:
         self.term_v = math.sqrt(
             (2 * self.mass * self.g) / (self.air_density * self.Cd * self.surface)
         )
+        self.has_hit = False
 
     def deplace(self):
         v = self.speed
@@ -47,20 +51,27 @@ class Meteor:
         self.speed += self.gravity
         self.rect = self.rect.move(self.x_speed, int(y_velocity))
         angle = math.atan(self.x_speed / y_velocity)
-        print(angle)
         current_frame = self.frames[self.frame_index]
-        print(current_frame)
-        self.frame = pygame.transform.rotate(current_frame, angle * 180 / math.pi)
+        self.frame = pygame.transform.rotate(
+            current_frame, angle * 180 / math.pi)
         centre = self.rect.center
         self.rect = self.frame.get_rect(center=centre)
 
     def impact_force(self):
-        return int(
-            0.5
-            * self.mass
-            * (self.x_speed**2 + self.speed / self.mps * self.dt)
-            / self.point_of_fall
-        )
+        vx = self.x_speed
+        vy = self.speed / self.mps
+        velocity = math.sqrt(vx**2+vy**2)
+        f = int(0.5*self.mass*(velocity**2)/4000000)
+        print(f)
+        return f
+
+    def collision(self, target):
+        x = self.rect.centerx-target.rect.centerx
+        y = self.rect.centery-target.rect.centery+10
+        distance = math.sqrt(x**2+y**2)
+        if distance <= self.radiuspx + target.radiuspx and not self.has_hit:
+            target.health -= self.impact_force()
+            self.has_hit = True
 
     def load_frames(self, frame_width=448, frame_height=448):
         frames = []
