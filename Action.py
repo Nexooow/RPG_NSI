@@ -205,3 +205,22 @@ class AjoutTemps(Action):
         self.jeu.temps += self.json["temps"]
         self.complete = True
         
+class Combat (Action):
+    
+    def __init__ (self, jeu, json):
+        super().__init__(jeu, json)
+        self.windows = [] # (dmg, start, end)
+        self.frame = 0
+        
+    def executer(self):
+        super().executer()
+        
+    def update (self, events):
+        self.frame += 1
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                for window in self.windows:
+                    if window[1] < self.frame:
+                        self.windows.remove(window)
+                        # PARRY
+                        
