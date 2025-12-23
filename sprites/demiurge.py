@@ -168,7 +168,7 @@ class Fighter:
                     return
             if self.angry:
                     if self.anger_timer%100==0:
-                        self.fireballs.append(Fireball(self.rect.centerx,self.rect.centery,-1 if self.flip else 1,15,self.image_scale//2,pygame.image.load('fireball.png').convert_alpha()))   
+                        self.fireballs.append(Fireball(self.rect.centerx,self.rect.centery,-1 if self.flip else 1,15,self.image_scale//2,pygame.image.load('./assets/sprites/fireball.png').convert_alpha()))   
                     self.anger_timer+=1
                     if self.anger_timer>=600:
                         self.angry=False
