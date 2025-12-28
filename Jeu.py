@@ -1,7 +1,7 @@
 import json
 import pygame
 
-from base.Action import Action, Deplacement, AjoutTemps, Combat
+from base.action import Action, Deplacement, AjoutTemps, Combat
 from base.Joueur import Joueur
 from base.JSONLoader import JSONLoader
 
@@ -11,8 +11,6 @@ from lib.render import text_render_centered
 
 from menu.accueil import Accueil
 from menu.carte import Carte
-
-from boss.radahn import Radahn
 
 sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
 aretes = [
@@ -42,24 +40,25 @@ class Jeu:
 
     def __init__(self):
 
+        self.identifiant = None
         self.running = True
         self.debute = False # si le jeu a débuté ou non
+
         self.menu = Accueil(self)
+
         self.clock = pygame.time.Clock()
+        self.loader = JSONLoader(self)
 
         self.fond = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
         self.ui_surface = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
         self.filter_surface = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
 
-        self.joueur = None
-        self.identifiant = None
-
         # carte et regions/lieux
         self.carte = Graph(sommets, aretes, True, positions_sommets)
+
         self.lieux_visite = set()
         self.pnj_rencontres = set()
 
-        self.loader = JSONLoader(self)
         self.action_actuelle: Action | None = None
         self.actions = File()
 
@@ -72,6 +71,8 @@ class Jeu:
         # filtres pour affichage
         self.fade = 300
 
+        self.loader.charger()
+
     # GETTERS
 
     def get_temps(self):
@@ -81,6 +82,11 @@ class Jeu:
         if self.region is None:
             return None
         return self.regions[self.region]
+
+    def get_pnj (self):
+        if self.lieu is None:
+            return None
+        return self.loader.npc[self.lieu.nom]
 
     # GESTION PARTIES
 
@@ -97,7 +103,10 @@ class Jeu:
         else:
             self.region = "Auberge"
             self.lieu = self.regions["Auberge"].entree
-            self.executer_sequence("debut")
+            self.joueur.ajouter_objet("potion_test", 3)
+            self.joueur.ajouter_objet("arme_test", 1)
+            #self.executer_sequence("combat_test")
+            self.executer_sequence("casan_famhair")
             #self.ajouter_action(Radahn(self)) # test radahn
         self.sauvegarder()
 
@@ -135,6 +144,12 @@ class Jeu:
     # AFFICHAGE, ÉVÉNEMENTS ET GESTION DES ACTIONS
 
     def gerer_evenement(self, evenements):
+        for event in evenements:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_i and self.menu is None:
+                    from menu.inventaire import Inventaire
+                    self.ouvrir_menu(Inventaire(self))
+
         if self.menu is not None:
             self.menu.update(evenements)
         elif self.action_actuelle is not None:
@@ -232,11 +247,15 @@ class Jeu:
         assert isinstance(action, Action), f"L'action à ajouter n'est pas une instance de la classe Action"
         self.actions.enfiler(action)
 
-    def executer_sequence(self, identifiant):
-        sequence = self.loader.recuperer_sequence(identifiant)
+    def executer_sequence(self, identifiant, priority=False):
+        sequence = self.loader.get_sequence(identifiant)
         if sequence:
-            for action in sequence:
-                self.ajouter_action(action)
+            if priority:
+                self.actions.inserer(sequence)
+            else:
+                for action in sequence:
+                    print(action)
+                    self.ajouter_action(action)
         else:
             print(f"⚠️ La séquence {identifiant} n'existe pas")
 

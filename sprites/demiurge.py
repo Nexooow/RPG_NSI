@@ -1,4 +1,5 @@
 import pygame
+
 class Fighter:
     def __init__(self,x,y,data,sprite,animation,attack_frame,hitbox_height=180):
         self.flip=False
@@ -37,6 +38,7 @@ class Fighter:
         self.angry=False
         self.anger_timer=0
         self.fireballs=[]
+
     def load_frames(self,sprite,animation):
         animation_list=[]
         for y,anim in enumerate(animation):
@@ -47,6 +49,7 @@ class Fighter:
                 temp_img_list.append(temp_img)
             animation_list.append(temp_img_list)
         return animation_list
+
     def move(self,screen_width,screen_height,surface,target,allow_input=True):
         speed=10
         dx=0
@@ -58,7 +61,6 @@ class Fighter:
         key=pygame.key.get_pressed()
         if allow_input and self.alive:
             if not self.attacking:
-                
                 if key[pygame.K_LEFT]:
                     self.flip=True
                 if key[pygame.K_RIGHT]:
@@ -69,8 +71,6 @@ class Fighter:
                     dx= dx-speed*10 if self.flip else dx+speed*10
                     self.dash=True
                     self.dash_cooldown=300
-                    
-                    
                 else:
                     if self.dash:
                         self.dash_cooldown-=1
@@ -107,6 +107,7 @@ class Fighter:
             dy=screen_height-110-self.rect.bottom
         self.rect.x+=dx
         self.rect.y+=dy
+
     def update(self,target=None):
         if self.health<=0:
             self.health=0
@@ -145,6 +146,7 @@ class Fighter:
         if self.attacking and not self.has_hit:
             if self.frame_index in self.attack_frame[self.attack_type]:
                 self.apply_attack(target)
+
     def apply_attack(self,player):
         if player is None:
             return
@@ -154,6 +156,7 @@ class Fighter:
                     player.health-=10
                     player.hit=True
                     self.has_hit=True
+
     def ai_behavior(self,surface,player):
         if self.alive and player.alive:
             if player.has_hit:
@@ -213,6 +216,7 @@ class Fighter:
             self.action=new_action
             self.frame_index=0
             self.update_time=pygame.time.get_ticks()
+
     def draw(self,surface):
         if self.blocking:
             self.bubble=pygame.transform.scale(self.bubble,(self.size*self.image_scale,self.size*self.image_scale))
@@ -221,6 +225,7 @@ class Fighter:
         self.img_pos=(self.rect.x-(self.offset[0]*self.image_scale),self.rect.y-(self.offset[1]*self.image_scale))
         surface.blit(img,self.img_pos)
         self.mask=pygame.mask.from_surface(img)
+
 class Fireball:
     def __init__(self,x,y,direction,speed,scale,sprite):
         self.speed=speed
@@ -248,8 +253,8 @@ class Fireball:
                 temp_img_list.append(temp_img)
             animation_list.append(temp_img_list)
         return animation_list
+
     def collision(self,player):
-        
         offset_x=player.img_pos[0] - self.rect.left
         offset_y=player.img_pos[1] - self.rect.top
         overlap=self.mask.overlap(player.mask,(offset_x,offset_y))
@@ -261,6 +266,7 @@ class Fireball:
             else:
                 player.health-=10
                 self.has_hit=True
+
     def update(self):
         animation_speed = 100
         now = pygame.time.get_ticks()
@@ -270,8 +276,10 @@ class Fireball:
             self.frame_index = (self.frame_index + 1) % len(self.animation_list[self.action])
             self.update_time = now
         self.image = self.animation_list[self.action][self.frame_index]
+
     def move(self):
         self.rect.x+=self.speed*self.direction
+
     def draw(self,surface):
         img=pygame.transform.flip(self.image,self.direction==-1,False)
         surface.blit(img,self.rect)

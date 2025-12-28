@@ -17,9 +17,11 @@ if __name__ == "__main__":
     while jeu.running:
         
         events = pygame.event.get()
+
         for event in events:
             if event.type == pygame.QUIT:
                 jeu.running = False
+
         jeu.gerer_evenement(events)
         jeu.executer()
         

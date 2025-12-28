@@ -49,17 +49,17 @@ class Accueil(Menu):
                 if self.menu_selected_option == 1 and len(self.saves) == 0:
                     self.menu_selected_option = 2
             elif event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE):
-                self.fermer()
                 if self.menu_selected_option == 0:
                     self.jeu.fade = 500
                     sound = pygame.mixer.Sound(
                         "./assets/sounds/accueil_clique.mp3")
                     sound.set_volume(0.10)
+                    self.fermer()
                     sound.play()
                     self.jeu.demarrer(str(uuid.uuid4()))
                 elif self.menu_selected_option == 1 and len(self.saves) > 0:
+                    print("ouvrir sauvegardes")
                     self.menu_selected_option = 0
-                    self.jeu.fade = 255
                     self.sous_page = "sauvegardes"
                 elif self.menu_selected_option == 2:
                     pass
@@ -67,6 +67,7 @@ class Accueil(Menu):
                     self.jeu.quitter()
 
     def update_page_sauvegardes(self, events):
+        print("update sauvegardes")
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
                 self.menu_selected_option -= 1
@@ -152,9 +153,10 @@ class Accueil(Menu):
         )
 
         for index, save in enumerate(self.saves):
+            jours, heures = divmod(save["temps"], 24)
             text_render_centered(
                 self.jeu.fond,
-                f"{save['id']}",
+                f"{jours} {heures:02d}h - {save["region"]} {save["lieu"]}",
                 "regular",
                 color=(245, 205, 0, 185),
                 pos=(1000 / 2, 175 + 25 + 50 * (index + 1)),
@@ -172,8 +174,7 @@ class Accueil(Menu):
 
         for particle in self.particules:
             pygame.draw.circle(
-                self.jeu.fond, (245, 205, 0,
-                                particle[1]), particle[0], particle[2]
+                self.jeu.fond, (245, 205, 0, particle[1]), particle[0], particle[2]
             )
             particle[0][1] -= 0.25
             if particle[0][1] < 0:

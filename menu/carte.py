@@ -13,17 +13,17 @@ class Carte (Menu):
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 self.fermer()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                position = event.pos
+                mouse_position = event.pos
                 if self.region is None: # graphe global
                     for region_name, region in self.jeu.regions.items():
-                        region_position = region.position
-                        if pygame.Rect((region_position[0]-50, region_position[1]-50, 150, 150)).collidepoint(position):
+                        position = region.position
+                        if pygame.Rect((position[0]-50, position[1]-50, 150, 150)).collidepoint(mouse_position):
                             self.region = region_name
                 else:   
                     region = self.jeu.regions[self.region]
                     for lieu_nom, lieu in region.lieux.items():
                         location = lieu["location"]
-                        if pygame.Rect((location["x"]-50, location["y"]-50, 150, 150)).collidepoint(position):
+                        if pygame.Rect((location["x"]-50, location["y"]-50, 150, 150)).collidepoint(mouse_position):
                             self.fermer()
                             self.jeu.deplacement(self.region, lieu_nom)
         

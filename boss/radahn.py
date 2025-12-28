@@ -3,7 +3,7 @@ from time import time
 
 import pygame
 
-from base.Action import Action
+from base.action import Action
 from lib.render import text_render_centered_up,text_render_centered
 from sprites.Explosion import Explosion
 from sprites.Meteor import Meteor

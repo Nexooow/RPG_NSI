@@ -33,7 +33,6 @@ def text_render_centered(
     )
     surface.blit(text_surface, position)
 
-
 def text_render_centered_up(
     surface, text, font, color=(0, 0, 0), pos=(0, 0), underline=False, size=None
 ):
@@ -44,7 +43,6 @@ def text_render_centered_up(
         center=(pos[0], pos[1] - text_surface.get_height() / 2)
     )
     surface.blit(text_surface, position)
-
 
 def text_render_centered_left(
     surface, text, font, color=(0, 0, 0), pos=(0, 0), underline=False, size=None

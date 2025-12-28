@@ -2,7 +2,7 @@ from glob import glob
 import json
 from random import randint, random
 
-from base.Action import Dialogue, Selection, AjoutTemps, Damage, Deplacement, Combat
+from base.action import Dialogue, Selection, AjoutTemps, Damage, Deplacement, Combat
 from base.Region import Region
 
 class JSONLoader:
@@ -12,9 +12,12 @@ class JSONLoader:
         self.actions_sequences = {}
         self.actions_types = {}
 
-        self.pnj = {}
+        self.npc = {}
+        self.items = {}
 
+    def charger (self):
         self.charger_actions()
+        self.charger_items()
 
     def charger_actions(self):
         files = glob("./.data/actions/**/*.json", recursive=True)
@@ -25,16 +28,32 @@ class JSONLoader:
                     assert isinstance(content, dict)
                     identifiant = content["id"]
                     type_sequence = content["type"]
+
                     if type_sequence in self.actions_types.keys():
                         self.actions_types[type_sequence].append(identifiant)
                     else:
                         self.actions_types[type_sequence] = [identifiant]
+
                     self.actions_sequences[identifiant] = []
                     for action in content["run"]:
                         self.actions_sequences[identifiant].append(self.creer_action(action))
                     print(f"Loader | Actions | séquence '{identifiant}' chargée ({len(self.actions_sequences[identifiant])} actions)")
-            except Exception:
-                print(f"impossible de charger la séquence '{file}'")
+            except Exception as e:
+                print(e)
+                print(f"impossible de charger la séquence '{file}': {e}")
+                continue
+
+    def charger_items (self):
+        files = glob("./.data/items/**/*.json", recursive=True)
+        for file in files:
+            try:
+                with open(file, "r", encoding="utf-8") as f:
+                    content = json.load(f)
+                    assert isinstance(content, dict)
+                    self.items[content["id"]] = content
+                    print(f"Loader | Items | {content['id']} chargé")
+            except Exception as e:
+                print(f"Impossible de charger l'item '{file}': {e}")
                 continue
 
     def charger_regions(self):
@@ -42,10 +61,11 @@ class JSONLoader:
         regions = {}
         for lieu in lieux_json:
             print(f"Loader | Lieux | {lieu['region']} > {lieu["id"]}")
-            if lieu["region"] not in regions:
-                regions[lieu["region"]] = [lieu]
+            region = lieu["region"] # la région du lieux
+            if region not in regions:
+                regions[region] = [lieu]
             else:
-                regions[lieu["region"]].append(lieu)
+                regions[region].append(lieu)
         return {
             "Auberge": Region(self.parent, "Auberge", regions["Auberge"]),
             "Mountain": Region(
@@ -60,22 +80,25 @@ class JSONLoader:
 
     def charger_lieux(self):
         with open("./.data/lieux.json", "r") as f:
-            content = json.load(f)
-            assert isinstance(content, list)
-            return content
+            try:
+                content = json.load(f)
+                assert isinstance(content, list)
+                return content
+            except Exception as e:
+                print(f"Impossible de charger les lieux: {e}")
         
-    def charger_pnj (self):
-        files = glob("./.data/actions/**/*.json", recursive=True)
+    def charger_npc (self):
+        files = glob("./.data/npc/**/*.json", recursive=True)
         for file in files:
             try:
                 with open(file) as f:
                     content = json.load(f)
                     assert isinstance(content, dict)
-                    self.pnj[content["id"]] = content
+                    self.npc[content["id"]] = content
             except Exception:
                 continue
 
-    def recuperer_sequence(self, sequence_id):
+    def get_sequence(self, sequence_id):
         if sequence_id in self.actions_sequences.keys():
             return self.actions_sequences[sequence_id]
         else:
