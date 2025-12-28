@@ -118,7 +118,7 @@ class Jeu:
         actions = [action.data for action in self.actions.contenu]
         data = {
             "id": self.identifiant,
-            "joueur": self.joueur.sauvegarder(),
+            "equipe": self.equipe.sauvegarder(),
             "temps": self.temps,
             "region": self.region,
             "lieu": self.lieu,
@@ -301,7 +301,7 @@ class Jeu:
 
         for heure in range(temps_deplacement):
 
-            chance = self.joueur.chance
+            chance = self.equipe.chance
             jour_sim, heure_sim = divmod(simulation_temps, 24)
             if heure_sim <= 5 or heure_sim >= 22: # moins de chance pendant la nuit
                 chance = chance * 0.75
