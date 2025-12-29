@@ -3,33 +3,48 @@ from base.Personnage import Personnage
 
 class Equipe:
 
-    def __init__ (self, jeu):
+    def __init__(self, jeu):
         self.jeu = jeu
         self.argent = 100
         self.chance = 10
-        self.personnages: list[Personnage] = [] # liste des personnages dans l'équipe (c.-à-d. débloqués)
+        self.personnages: list[Personnage] = []  # Liste des personnages dans l'équipe (c.-à-d. débloqués)
         self.inventaire = {}
 
-    def get_personnage (self, nom) -> Personnage | None:
+    def get_personnage(self, nom) -> Personnage | None:
         for personnage in self.personnages:
             if personnage.nom == nom:
                 return personnage
         return None
 
-    def personnage_debloque (self, nom) -> bool:
+    def personnage_debloque(self, nom) -> bool:
         personnage = self.get_personnage(nom)
         return personnage is not None
 
-    def ajouter_personnage (self, personnage):
+    def ajouter_personnage(self, personnage):
         self.personnages.append(personnage)
 
-    def equiper_personnage (self, nom, item_id):
+    def equiper_personnage(self, nom, item_id):
         if item_id in self.inventaire:
             personnage = self.get_personnage(nom)
             if personnage:
                 personnage.equiper(item_id)
 
-    def restaurer (self, json):
+    def ajouter_item(self, item_id, quantite=1):
+        if item_id in self.inventaire:
+            self.inventaire[item_id] += quantite
+        else:
+            self.inventaire[item_id] = quantite
+
+    def retirer_item(self, item_id, quantite=None):
+        if item_id in self.inventaire:
+            if quantite is None:
+                del self.inventaire[item_id]
+            else:
+                self.inventaire[item_id] -= quantite
+                if self.inventaire[item_id] <= 0:
+                    del self.inventaire[item_id]
+
+    def restaurer(self, json):
         self.argent = json["argent"]
         self.chance = json["chance"]
         self.inventaire = json["inventaire"]
@@ -37,18 +52,18 @@ class Equipe:
             # TODO: charger les personnages selon le json indiqué
             pass
 
-    def sauvegarder (self):
+    def sauvegarder(self):
         return {
             "argent": self.argent,
             "chance": self.chance,
             "inventaire": self.inventaire,
-            "personnages": [] # TODO: sauvegarder les personnages
+            "personnages": []  # TODO: sauvegarder les personnages
         }
 
-    def infliger (self, degats):
+    def infliger(self, degats):
         for personnage in self.personnages:
             personnage.infliger(degats)
 
-    def soigner (self, points):
+    def soigner(self, points):
         for personnage in self.personnages:
             personnage.soigner(points)

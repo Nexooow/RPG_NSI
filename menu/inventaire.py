@@ -24,11 +24,13 @@ class Inventaire(Menu):
                         self.utiliser_item(items_ids[self.selection])
                 elif event.key == pygame.K_ESCAPE:
                     self.fermer()
+
     def ajouter_item(self,item_id, quantite=1):
         if item_id in self.jeu.joueur.inventaire:
             self.jeu.joueur.inventaire[item_id] += quantite
         else:
             self.jeu.joueur.inventaire[item_id] = quantite
+
     def utiliser_item(self, item_id):
         item_data = self.jeu.items.get(item_id)
         if not item_data:

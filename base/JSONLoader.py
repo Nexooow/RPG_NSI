@@ -2,8 +2,9 @@ from glob import glob
 import json
 from random import randint, random
 
-from base.action import Dialogue, Selection, AjoutTemps, Damage, Deplacement, Combat
+from base.action import Action, actions_par_type
 from base.Region import Region
+
 
 class JSONLoader:
     def __init__(self, parent):
@@ -15,7 +16,7 @@ class JSONLoader:
         self.npc = {}
         self.items = {}
 
-    def charger (self):
+    def charger(self):
         self.charger_actions()
         self.charger_items()
 
@@ -24,8 +25,10 @@ class JSONLoader:
         for file in files:
             try:
                 with open(file, "r", encoding="utf-8") as f:
+
                     content = json.load(f)
                     assert isinstance(content, dict)
+                    assert "run" in content and "id" in content
                     identifiant = content["id"]
                     type_sequence = content["type"]
 
@@ -36,14 +39,18 @@ class JSONLoader:
 
                     self.actions_sequences[identifiant] = []
                     for action in content["run"]:
+                        assert isinstance(action, dict)
+                        assert "type" in action
                         self.actions_sequences[identifiant].append(self.creer_action(action))
-                    print(f"Loader | Actions | séquence '{identifiant}' chargée ({len(self.actions_sequences[identifiant])} actions)")
+
+                    print(
+                        f"Loader | Actions | séquence '{identifiant}' chargée ({len(self.actions_sequences[identifiant])} actions)")
+
             except Exception as e:
-                print(e)
                 print(f"impossible de charger la séquence '{file}': {e}")
                 continue
 
-    def charger_items (self):
+    def charger_items(self):
         files = glob("./.data/items/**/*.json", recursive=True)
         for file in files:
             try:
@@ -61,7 +68,7 @@ class JSONLoader:
         regions = {}
         for lieu in lieux_json:
             print(f"Loader | Lieux | {lieu['region']} > {lieu["id"]}")
-            region = lieu["region"] # la région du lieux
+            region = lieu["region"]  # la région du lieux
             if region not in regions:
                 regions[region] = [lieu]
             else:
@@ -86,8 +93,8 @@ class JSONLoader:
                 return content
             except Exception as e:
                 print(f"Impossible de charger les lieux: {e}")
-        
-    def charger_npc (self):
+
+    def charger_npc(self):
         files = glob("./.data/npc/**/*.json", recursive=True)
         for file in files:
             try:
@@ -98,27 +105,20 @@ class JSONLoader:
             except Exception:
                 continue
 
-    def get_sequence(self, sequence_id):
+    def get_sequence(self, sequence_id: str) -> list[Action] | None:
         if sequence_id in self.actions_sequences.keys():
             return self.actions_sequences[sequence_id]
         else:
             return None
 
-    def creer_action(self, data: dict):
-        actions = {
-            "dialogue": Dialogue,
-            "select": Selection,
-            "damage": Damage,
-            "ajout-temps": AjoutTemps,
-            "deplacement": Deplacement,
-            "combat": Combat
-        }
+    def creer_action(self, data: dict) -> Action | None:
         try:
-            return actions[data["type"]](self.parent, data) # instancie l'action correspondante
+            return actions_par_type[data["type"]](self.parent, data)  # instancie l'action correspondante
         except KeyError:
+            print(f"Action inconnue: {data["type"]}")
             return None
 
-    def tirer_action(self, chance):
+    def tirer_action(self, chance: int) -> str | None:
         evenement = random() * 100 <= 15
         if evenement:
             if randint(0, 100) <= chance:

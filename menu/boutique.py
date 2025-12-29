@@ -31,11 +31,13 @@ class Boutique(Menu):
             self.jeu.joueur.argent -= prix
             self.jeu.joueur.inventaire.ajouter_item(item_id)
             self.jeu.marchant.inventaire.retirer_item(item_id)
+
     def draw(self):
         text_render_centered(self.jeu.ui_surface, "BOUTIQUE", "bold", color=(255, 255, 255), pos=(self.jeu.WIDTH // 2, 50), size=40)
         items_ids = list(self.jeu.marchant.inventaire.keys())
         start_x = 50
         start_y = 120
+
         for i, item_id in enumerate(items_ids):
             item_data = self.jeu.items.get(item_id, {"nom": item_id, "prix": 0})
             quantite = self.jeu.marchant.inventaire[item_id]
@@ -49,6 +51,7 @@ class Boutique(Menu):
                 pos=(start_x, start_y + i * 40), 
                 size=24
             )
+
         if items_ids and self.selection < len(items_ids):
 
             item_id = items_ids[self.selection]

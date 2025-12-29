@@ -2,7 +2,6 @@ import json
 import pygame
 
 from base.action import Action, Deplacement, AjoutTemps, Combat
-from base.Joueur import Joueur
 from base.JSONLoader import JSONLoader
 from base.Equipe import Equipe
 
@@ -36,8 +35,8 @@ positions_sommets = {
     "Elder Tree": (500, 260),
 }
 
-class Jeu:
 
+class Jeu:
     WIDTH = 1000
     HEIGHT = 700
 
@@ -45,7 +44,7 @@ class Jeu:
 
         self.identifiant = None
         self.running = True
-        self.debute = False # si le jeu a débuté ou non
+        self.debute = False  # si le jeu a débuté ou non
 
         self.menu = Accueil(self)
 
@@ -59,10 +58,9 @@ class Jeu:
         # carte et regions/lieux
         self.carte = Graph(sommets, aretes, True, positions_sommets)
 
-        self.equipe = Equipe()
+        self.equipe = Equipe(self)
 
-        self.lieux_visite = set()
-        self.pnj_rencontres = set()
+        self.variables_jeu = {}  # variables utilisés par certaines actions (exemple : stock des boutiques ...)
 
         self.action_actuelle: Action | None = None
         self.actions = File()
@@ -72,7 +70,7 @@ class Jeu:
         self.lieu = self.regions["Auberge"].entree
 
         self.temps = 24 + 12
-        self.marchant = None
+
         # filtres pour affichage
         self.fade = 300
 
@@ -81,14 +79,14 @@ class Jeu:
     # GETTERS
 
     def get_temps(self):
-        return divmod(self.temps, 24) # retourne (temps//24, temps%24) donc (jour, heure)
+        return divmod(self.temps, 24)  # retourne (temps//24, temps%24) donc (jour, heure)
 
     def get_region_actuelle(self):
         if self.region is None:
             return None
         return self.regions[self.region]
 
-    def get_pnj (self):
+    def get_pnj(self):
         if self.lieu is None:
             return None
         return self.loader.npc[self.lieu.nom]
@@ -108,6 +106,8 @@ class Jeu:
         self.region = save_json["region"]
         self.lieu = self.regions[self.region]
         self.temps = save_json["temps"]
+        self.equipe.restaurer(save_json["equipe"])
+        self.variables_jeu = save_json["variables_jeu"]
         if save_json["actions"]:
             for action in save_json["actions"]:
                 action_instance = self.loader.creer_action(action)
@@ -124,8 +124,7 @@ class Jeu:
             "temps": self.temps,
             "region": self.region,
             "lieu": self.lieu,
-            "lieux_visites": list(self.lieux_visite),
-            "pnj_rencontres": list(self.pnj_rencontres),
+            "variables_jeu": self.variables_jeu,
             "actions": actions,
             "action_actuelle": self.action_actuelle.data if self.action_actuelle else None
         }
@@ -173,11 +172,11 @@ class Jeu:
             if self.action_actuelle is not None:
                 self.action_actuelle.draw()
             self.ui()
-        self.filters() # applique les filtres sur l'écran
+        self.filters()  # applique les filtres sur l'écran
 
     def ui(self):
         if not self.action_actuelle or (
-            self.action_actuelle and not self.action_actuelle.desactive_ui
+                self.action_actuelle and not self.action_actuelle.desactive_ui
         ):
             (jour, heure) = self.get_temps()
 
@@ -238,9 +237,10 @@ class Jeu:
             self.fade -= 2
 
     # GESTION ACTIONS
-            
+
     def ajouter_action(self, action):
-        assert isinstance(action, Action), f"L'action à ajouter n'est pas une instance de la classe Action mais est de type {type(action)}"
+        assert isinstance(action,
+                          Action), f"L'action à ajouter n'est pas une instance de la classe Action mais est de type {type(action)}"
         self.actions.enfiler(action)
 
     def executer_sequence(self, identifiant, priority=False):
@@ -266,12 +266,12 @@ class Jeu:
 
     # DEPLACEMENTS
 
-    def calcul_temps_deplacement (self, region, lieu):
+    def calcul_temps_deplacement(self, region, lieu):
         temps_deplacement = 0
         region_actuelle = self.get_region_actuelle()
         if region != region_actuelle.nom:  # destination dans une autre région
             if (
-                self.lieu != region_actuelle.entree
+                    self.lieu != region_actuelle.entree
             ):  # se déplacer d'abord vers l'entrée de la région pour en sortir
                 temps_deplacement += region_actuelle.carte.paths(
                     self.lieu, region_actuelle.entree
@@ -305,7 +305,7 @@ class Jeu:
 
             chance = self.equipe.chance
             jour_sim, heure_sim = divmod(simulation_temps, 24)
-            if heure_sim <= 5 or heure_sim >= 22: # moins de chance pendant la nuit
+            if heure_sim <= 5 or heure_sim >= 22:  # moins de chance pendant la nuit
                 chance = chance * 0.75
             # TODO: chance différente selon la région
 
@@ -316,9 +316,11 @@ class Jeu:
                 self.executer_sequence(sequence)
 
             simulation_temps += 1
-            self.ajouter_action(AjoutTemps(self, { "type": "ajout-temps", "temps": 1 })) # permet l'ajout de temps progressivement
+            self.ajouter_action(
+                AjoutTemps(self, {"type": "ajout-temps", "temps": 1}))  # permet l'ajout de temps progressivement
 
         print(f"temps du trajet : {temps_deplacement}")
-        self.ajouter_action(Deplacement(self, { "region": region, "lieu": lieu, "type": "deplacement" }))
+        self.ajouter_action(Deplacement(self, {"region": region, "lieu": lieu, "type": "deplacement"}))
+
     def ouvrir_boutique(self):
         self.ouvrir_menu(Boutique(self))
