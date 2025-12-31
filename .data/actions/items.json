@@ -1,6 +1,6 @@
 {
     "id": "poutine",
-    "type": "ajout-items",
+    "type": "action",
     "run": [
         {
             "type": "ajout-items",

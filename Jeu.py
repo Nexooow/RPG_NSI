@@ -1,7 +1,8 @@
 import json
 import pygame
 
-from base.action import Action, Deplacement, AjoutTemps, Combat
+from base.Personnage import Vous
+from base.action import Action, Deplacement, AjoutTemps, Combat, SelectionAction
 from base.JSONLoader import JSONLoader
 from base.Equipe import Equipe
 
@@ -12,7 +13,6 @@ from lib.render import text_render_centered
 from menu.accueil import Accueil
 from menu.carte import Carte
 from menu.inventaire import Inventaire
-from menu.boutique import Boutique
 
 sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
 aretes = [
@@ -100,6 +100,8 @@ class Jeu:
         print(f"Démarrage de la partie avec l'identifiant {self.identifiant}")
         if save_json is not None:
             self.restaurer(save_json)
+        else:
+            self.equipe.ajouter_personnage(Vous(self.equipe))
         self.sauvegarder()
 
     def restaurer(self, save_json):
@@ -137,12 +139,6 @@ class Jeu:
     # AFFICHAGE, ÉVÉNEMENTS ET GESTION DES ACTIONS
 
     def gerer_evenement(self, evenements):
-        for event in evenements:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_i and self.menu is None:
-                    from menu.inventaire import Inventaire
-                    self.ouvrir_menu(Inventaire(self))
-
         if self.menu is not None:
             self.menu.update(evenements)
         elif self.action_actuelle is not None:
@@ -154,6 +150,9 @@ class Jeu:
             if not self.actions.est_vide():
                 self.action_actuelle = self.actions.defiler()
                 assert self.action_actuelle is not None
+                self.action_actuelle.executer()
+            else:
+                self.action_actuelle = SelectionAction(self, {"type": "selection-action"})
                 self.action_actuelle.executer()
         else:
             if action.get_complete():
@@ -238,6 +237,14 @@ class Jeu:
 
     # GESTION ACTIONS
 
+    def interagir(self, npc=None):
+        if npc is None:
+            npc = self.lieu
+        if f"{npc}:rencontre" not in self.variables_jeu:
+            self.executer_sequence(npc + ":rencontre")
+        self.executer_sequence(npc + ":interaction")
+        self.variables_jeu[f"{npc}:rencontre"] = True
+
     def ajouter_action(self, action):
         assert isinstance(action,
                           Action), f"L'action à ajouter n'est pas une instance de la classe Action mais est de type {type(action)}"
@@ -321,6 +328,3 @@ class Jeu:
 
         print(f"temps du trajet : {temps_deplacement}")
         self.ajouter_action(Deplacement(self, {"region": region, "lieu": lieu, "type": "deplacement"}))
-
-    def ouvrir_boutique(self):
-        self.ouvrir_menu(Boutique(self))

@@ -1,6 +1,5 @@
 import pygame
 from .Action import Action
-from base.JSONLoader import JSONLoader
 
 
 class AjoutItems(Action):

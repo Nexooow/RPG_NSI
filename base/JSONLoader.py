@@ -19,6 +19,22 @@ class JSONLoader:
     def charger(self):
         self.charger_actions()
         self.charger_items()
+        self.charger_npc()
+
+    def creer_sequence(self, identifiant, actions, type_sequence=None):
+        if type_sequence is None:
+            type_sequence = "action"  # type par défault
+
+        if type_sequence in self.actions_types.keys():
+            self.actions_types[type_sequence].append(identifiant)
+        else:
+            self.actions_types[type_sequence] = [identifiant]
+
+        self.actions_sequences[identifiant] = []
+        for action in actions:
+            assert isinstance(action, dict)
+            assert "type" in action
+            self.actions_sequences[identifiant].append(self.creer_action(action))
 
     def charger_actions(self):
         files = glob("./.data/actions/**/*.json", recursive=True)
@@ -32,16 +48,7 @@ class JSONLoader:
                     identifiant = content["id"]
                     type_sequence = content["type"]
 
-                    if type_sequence in self.actions_types.keys():
-                        self.actions_types[type_sequence].append(identifiant)
-                    else:
-                        self.actions_types[type_sequence] = [identifiant]
-
-                    self.actions_sequences[identifiant] = []
-                    for action in content["run"]:
-                        assert isinstance(action, dict)
-                        assert "type" in action
-                        self.actions_sequences[identifiant].append(self.creer_action(action))
+                    self.creer_sequence(identifiant, content["run"], type_sequence)
 
                     print(
                         f"Loader | Actions | séquence '{identifiant}' chargée ({len(self.actions_sequences[identifiant])} actions)")
@@ -102,6 +109,10 @@ class JSONLoader:
                     content = json.load(f)
                     assert isinstance(content, dict)
                     self.npc[content["id"]] = content
+                    if "rencontre" in content and content["rencontre"]:
+                        # sequence premiere interaction
+                        self.creer_sequence(f"{content["id"]}:rencontre", content["rencontre"], "action")
+                    self.creer_sequence(f"{content['id']}:interaction", content["interaction"], "action")
             except Exception:
                 continue
 

@@ -1,4 +1,10 @@
-from base.Personnage import Personnage
+from base.Personnage import Personnage, Barman, Fachan, Vous
+
+classes_personnages = {
+    "Barman": Barman,
+    "Vous": Vous,
+    "Fachan": Fachan
+}
 
 
 class Equipe:
@@ -49,6 +55,10 @@ class Equipe:
         self.chance = json["chance"]
         self.inventaire = json["inventaire"]
         for personnage in json["personnages"]:
+            perso = classes_personnages[personnage["nom"]]
+            self.ajouter_personnage(
+                perso(self, personnage)
+            )
             # TODO: charger les personnages selon le json indiqué
             pass
 

@@ -5,7 +5,10 @@
         {
             "type": "dialogue",
             "speaker": "Test",
-            "lines": ["Bienvenue cher aventurier !", "ligne 2"]
+            "lines": [
+                "Bienvenue cher aventurier !",
+                "ligne 2"
+            ]
         },
         {
             "type": "select",
@@ -21,8 +24,22 @@
                 }
             ],
             "actions": {
-                "1": "action1",
-                "2": "action2"
+                "1": [
+                    {
+                        "type": "dialogue",
+                        "lines": [
+                            "tu as répondu 1"
+                        ]
+                    }
+                ],
+                "2": [
+                    {
+                        "type": "dialogue",
+                        "lines": [
+                            "tu as répondu 2"
+                        ]
+                    }
+                ]
             }
         }
     ]

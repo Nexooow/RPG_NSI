@@ -1,46 +1,50 @@
 class Personnage:
 
     def __init__(self, equipe, parametres, data=None):
+
         self.equipe = equipe
         self.nom = parametres["nom"]
+        self.competences = parametres["competences"]
 
-        self.vie_max = 100
-        self.vie = 100
-        self.force = 10
-        self.vitesse = 10
-
+        self.attributs = {
+            "vie_max": 100,
+            "vie": 100,
+            "force": 10,
+            "vitesse": 10
+        }
         self.arme = None
 
         self.competences_equipes = []
         self.competences_debloques = []
-        self.competences = parametres["competences"]
 
-    def est_mort(self):
-        return self.vie <= 0
+        if data: self.restaurer(data)
 
     def restaurer(self, json):
-        self.vie_max = json["vie_max"]
-        self.vie = json["vie"]
-        self.force = json["force"]
-        self.vitesse = json["vitesse"]
-
+        self.attributs = json["attributs"]
         self.arme = json["arme"]
 
         self.competences_equipes = json["competences_equipes"]
         self.competences_debloques = json["competences_debloques"]
 
-    # TODO: système de compétences (avec arbre)
-    # TODO: attributs du personnage (force, vitesse, chance, resistance ...)
+    def sauvegarder(self):
+        return {
+            "nom": self.nom,
+            "attributs": self.attributs,
+            "arme": self.arme,
+            "competences_equipes": self.competences_equipes,
+            "competences_debloques": self.competences_debloques
+        }
+
+    def get_attributs(self):
+        attributs = self.attributs.copy()
+        if self.arme is not None:
+            attributs.update(self.arme["attributs"])
+        return attributs
 
     def equiper(self, item_id):
-        if self.arme:
-            self.desequiper()
-        # TODO: équiper l'arme et ajouter les bonus
-
-    def desequiper(self):
-        if self.arme is not None:
-            # TODO: retirer les bonus de l'arme
-            self.arme = None
+        arme = self.equipe.jeu.loader.items[item_id]
+        if arme:
+            self.arme = arme
 
     def utiliser(self, item):
         pass
@@ -70,7 +74,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 2
                         },
-                        "points": 0
+                        "cible": "ennemi"
                     },
                     "tournee_generale": {
                         "nom": "Tournée Générale",
@@ -79,6 +83,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 3
                         },
+                        "cible": None
                     },
                     "flambee": {
                         "nom": "Flambée",
@@ -87,6 +92,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 6
                         },
+                        "cible": None
                     },
                     "cocktail_molotov": {
                         "nom": "Cocktail Molotov",
@@ -95,6 +101,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 4
                         },
+                        "cible": "ennemi"
                     },
                     "double_shot": {
                         "nom": "Double Shot",
@@ -104,6 +111,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 3
                         },
+                        "cible": "ennemi"
                     },
                     "happy_hour": {
                         "nom": "Happy Hour",
@@ -112,6 +120,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 6
                         },
+                        "cible": None
                     },
                     "gueule_de_bois": {
                         "nom": "Gueule de Bois",
@@ -121,6 +130,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 5
                         },
+                        "cible": "ennemi"
                     },
                     "dernier_verre": {
                         "nom": "Le Dernier Verre",
@@ -130,6 +140,7 @@ class Barman(Personnage):
                             "pa": 8,
                             "alcoolemie": 3
                         },
+                        "cible": "ennemi"
                     },
                     "shot_enflamme": {
                         "nom": "Shot Enflammé",
@@ -138,6 +149,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 4
                         },
+                        "cible": "Ennemi"
                     },
                     "cuite_explosive": {
                         "nom": "Cuite Explosive",
@@ -153,6 +165,29 @@ class Barman(Personnage):
             data
         )
 
+    def utiliser_competence(self, competence, cibles):
+        match competence:
+            case "flameche":
+                pass
+            case "tournee_generale":
+                pass
+            case "flambee":
+                pass
+            case "cocktail_molotov":
+                pass
+            case "double_shot":
+                pass
+            case "happy_hour":
+                pass
+            case "gueule_de_bois":
+                pass
+            case "dernier_verre":
+                pass
+            case "shot_enflamme":
+                pass
+            case "cuite_explosive":
+                pass
+
 
 class Vous(Personnage):
 
@@ -166,6 +201,7 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 2
                     },
+                    "cible": "ennemi"
                 },
                 "marque": {
                     "nom": "Frappe marquante",
@@ -173,6 +209,7 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 2
                     },
+                    "cible": "ennemi"
                 },
                 "charge_devastatrice": {
                     "nom": "Charge Dévastatrice",
@@ -181,6 +218,7 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 3
                     },
+                    "cible": "ennemi"
                 },
                 "broyeur": {
                     "nom": "Broyeur",
@@ -189,6 +227,7 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 4
                     },
+                    "cible": "ennemi"
                 },
                 "riposte": {
                     "nom": "Riposte",
@@ -198,8 +237,9 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 3
                     },
+                    "cible": None
                 },
-                "enchaînement": {
+                "enchainement": {
                     "nom": "Enchaînement",
                     "description": "Série de 3 frappes rapides sur un ennemi. Chaque frappe inflige 20% de dégats en plus"
                                    "que la précédente. Si la cible est Marquée, la 3ème frappe applique "
@@ -207,6 +247,7 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 5
                     },
+                    "cible": "ennemi"
                 },
                 "frappe_tactique": {
                     "nom": "Frappe tactique",
@@ -215,6 +256,7 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 4
                     },
+                    "cible": "ennemi"
                 },
                 "furie_guerriere": {
                     "nom": "Furie Guerrière",
@@ -223,6 +265,7 @@ class Vous(Personnage):
                     "cost": {
                         "pa": 5
                     },
+                    "cible": "ennemi"
                 },
                 "execution": {
                     "nom": "Exécution",
@@ -232,6 +275,7 @@ class Vous(Personnage):
                         "pa": 8,
                         "elan": 5
                     },
+                    "cible": "ennemi"
                 },
                 "onde_de_choc": {
                     "nom": "Onde de Choc",
@@ -242,52 +286,105 @@ class Vous(Personnage):
                         "pa": 6,
                         "elan": 2
                     },
+                    "cible": None
                 },
 
             }
-        })
+        }, data)
+
+    def utiliser_competence(self, competence, cibles):
+        match competence:
+            case "coup_de_poing":
+                pass
+            case "marque":
+                pass
+            case "charge_devastatrice":
+                pass
+            case "broyeur":
+                pass
+            case "riposte":
+                pass
+            case "enchainement":
+                pass
+            case "frappe_tactique":
+                pass
+            case "furie_guerriere":
+                pass
+            case "execution":
+                pass
+            case "onde_de_choc":
+                pass
+
+
 class Fachan(Personnage):
-    def __init__(self,equipe,data=None):
-        super().__init__(equipe,{
-            "nom":"Fachan",
-            "competences":{
-                "Regard jugeur":{
-                    "nom":"Regard jugeur",
-                    "description":"Lance un regard jugeur aux ennemis, encaissant 90% des dégâts au prochain tour. Gagne un stack de mitigation.",
-                    "cost":{"pa":2}                },
-                
-                    "Caisteal":{
-                        "nom":"Caisteal",
-                        "description":"Concentre toutes les attaques ennemies sur lui jusqu'à son prochain tour, gagne 30% de degats encaisses.",
-                        "cost":{"pa":4,"mitigation":1}
+
+    def __init__(self, equipe, data=None):
+        super().__init__(equipe, {
+            "nom": "Fachan",
+            "competences": {
+                "regard_jugeur": {
+                    "nom": "Regard jugeur",
+                    "description": "Lance un regard jugeur aux ennemis, encaissant 90% des dégâts au prochain tour. Gagne un stack de mitigation.",
+                    "cost": {"pa": 2},
+                    "cible": None
+                },
+                "caisteal": {
+                    "nom": "Caisteal",
+                    "description": "Concentre toutes les attaques ennemies sur lui jusqu'à son prochain tour, gagne 30% de degats encaisses.",
+                    "cost": {"pa": 4, "mitigation": 1},
+                    "cible": None
+                },
+                "caber": {
+                    "nom": "Caber",
+                    "description": "lance sa massue sur un ennemi, 50% de chances de l'étourdir et 15% de chances que l'attaque se transmette à un autre ennemi",
+                    "cost": {
+                        "pa": 3
                     },
-                    "Caber":{
-                        "nom":"Caber",
-                        "description":"lance sa massue sur un ennemi, 50% de chances de l'étourdir et 15% de chances que l'attaque se transmette à un autre ennemi",
-                        "cost":{
-                            "pa":3
-                    }
+                    "cible": "ennemi"
                 },
-                "Fureur de Fachan":{
-                    "nom":"Fureur de Fachan",
-                    "description":"Diminue de 20% les dégâts pour chaque stack de mitigation possédé",
-                    "cost":{
-                        "pa":0
-                    }
+                "fureur_de_fachan": {
+                    "nom": "Fureur de Fachan",
+                    "description": "Diminue de 20% les dégâts pour chaque stack de mitigation possédé",
+                    "cost": {
+                        "pa": 0
+                    },
+                    "cible": None
                 },
-                "Tignasse":{
-                    "nom":"Tignasse",
-                    "description":"Protège toute l'equipe avec sa chevelure. 15% de dommages en moins,
-                    "cost":{"pa":3}},
-                "Stalin":{
-                    "nom":"Stalin",
-                    "description":"Deviens l'Homme de Fer et encaisse tous les dégâts physiques pendant les trois prochains tours. Gagne un stack de mitigation",
-                    "cost":{"pa":4}
+                "tignasse": {
+                    "nom": "Tignasse",
+                    "description": "Protège toute l'equipe avec sa chevelure. 15% de dommages en moins,",
+                    "cost": {
+                        "pa": 3},
+                    "cible": None
                 },
-                "Où sont mes pieds":{
-                    "nom":"Où sont mes pieds",
-                    "description":"Cherche sa deuxième jambe, devient incapable d'attaquer mais récupère 50% de ses pv",
-                    "cost":{"pa":4}
+                "stalin": {
+                    "nom": "Stalin",
+                    "description": "Deviens l'Homme de Fer et encaisse tous les dégâts physiques pendant les trois prochains tours. Gagne un stack de mitigation",
+                    "cost": {"pa": 4},
+                    "cible": None
+                },
+                "ou_sont_mes_pieds": {
+                    "nom": "Où sont mes pieds",
+                    "description": "Cherche sa deuxième jambe, devient incapable d'attaquer mais récupère 50% de ses pv",
+                    "cost": {"pa": 4},
+                    "cible": None
                 }
             }
-        }
+        }, data)
+
+    def utiliser_competence(self, combat, competence, cible=None):
+        match competence:
+            case "regard_jugeur":
+                pass
+            case "caisteal":
+                pass
+            case "caber":
+                pass
+            case "fureur_de_fachan":
+                pass
+            case "tignasse":
+                pass
+            case "stalin":
+                pass
+            case "ou_sont_mes_pieds":
+                pass
