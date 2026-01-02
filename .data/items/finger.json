@@ -1,8 +1,8 @@
 {"items":[
 {
-    "id": "rotten finger",
-    "nom": "Doigt Pourri",
-    "description": "Un doigt pourri",
+    "id": "finger",
+    "nom": "finger",
+    "description": "Doigt du Divin Paresseux",
     "type": "consommable",
     "effets": [],
     "valeur": 0
@@ -10,7 +10,7 @@
     
 },
 {
-"id":"rotten finger",
+"id":"finger",
     "type":"action",
     "run":[{"type":"ajout-item",
     "items":[{"id":"rotten finger","quantite":1}]
