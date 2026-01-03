@@ -110,7 +110,7 @@ class Boutique(Action):
                                           pos=(detail_x, detail_y), size=32)
 
                 desc = item_data.get("description", "")
-                # Simple line wrap (très basique)
+
                 words = desc.split(' ')
                 lines = []
                 current_line = ""
