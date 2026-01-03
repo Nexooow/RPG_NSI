@@ -1,0 +1,16 @@
+{
+    "type": "action",
+    "id": "test_combat",
+    "run": [
+        {
+            "type": "combat",
+            "ennemis": [
+                {
+                    "type": "ennemi",
+                    "nom": "Gobelin",
+                    "vie": 100
+                }
+            ]
+        }
+    ]
+}

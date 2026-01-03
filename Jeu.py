@@ -1,7 +1,7 @@
 import json
 import pygame
 
-from base.Personnage import Vous
+from base.Personnage import Vous, Barman
 from base.action import Action, Deplacement, AjoutTemps, Combat, SelectionAction
 from base.JSONLoader import JSONLoader
 from base.Equipe import Equipe
@@ -101,8 +101,9 @@ class Jeu:
         if save_json is not None:
             self.restaurer(save_json)
         else:
-            self.equipe.ajouter_personnage(Vous(self.equipe))
-        self.executer_sequence("debut")
+            # self.equipe.ajouter_personnage(Vous(self.equipe))
+            self.equipe.ajouter_personnage(Barman(self.equipe))
+        self.executer_sequence("test_combat")
         self.sauvegarder()
 
     def restaurer(self, save_json):

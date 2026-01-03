@@ -7,6 +7,16 @@ from lib.file import File
 parrysound = pygame.mixer.Sound("assets/sounds/parry.mp3")
 parrysound.set_volume(0.05)
 
+total_height = 200
+box_y = 700 - total_height - 20
+box_width = 960
+box_x = 20
+couleur_hightlight = (70, 70, 90)
+
+separator_x = box_x + 400
+
+menu_width = box_width - (separator_x - box_x)
+
 
 def instance_combat(personnage):
     """
@@ -20,7 +30,7 @@ def instance_combat(personnage):
         "competences": [
             {**competence, "id": id_competence}
             for id_competence, competence in personnage.competences.items()
-            if id_competence in personnage.competences_debloques
+            if id_competence in personnage.competences_equipes
         ]
     }
 
@@ -51,19 +61,28 @@ class Combat(Action):
         self.tours = File()
         self.tour = None
         self.action = None
+        self.options = []
 
-        self.ennemis = [transformer_ennemi(ennemi) for ennemi in self.jeu.equipe.ennemis]
+        self.ennemis = [transformer_ennemi(ennemi) for ennemi in data["ennemis"]]
         self.personnages = []
+
+        self.attaques = []
 
         self.menu_actuel = "principal"
         self.selection = 0
 
+        self.action_en_cours = False
+
+        self.message = None
+
     def executer(self):
+        super().executer()
         self.action = "selection"
         self.menu_actuel = "principal"
 
         self.personnages = [instance_combat(personnage) for personnage in self.jeu.equipe.personnages]
         self.maj_tours()
+        self.tour = self.tours.defiler()
 
     def maj_tours(self):
         combatants = self.personnages + self.ennemis
@@ -73,7 +92,7 @@ class Combat(Action):
             # tri selon la vitesse, si égalité, on privilégie les personnages
             reverse=True
         )
-        vitesse_moyenne = sum(combatant["vitesse"] for combatant in combatants) / len(
+        vitesse_moyenne = sum(combatant["attributs"].get("vitesse", 0) for combatant in combatants) / len(
             combatants) if combatants else 1
 
         for combatant in combatants:
@@ -86,13 +105,17 @@ class Combat(Action):
             for _ in range(nombre_tours):
                 self.tours.enfiler(combatant)
 
+    def set_message(self, message):
+        self.message = (message, 90)
+
     def prochain_tour(self):
         if self.tours.est_vide():
             self.maj_tours()
         self.tour = self.tours.defiler()
-        self.action = "selection"
+        self.action = "pre-tour"
         self.menu_actuel = "principal"
         self.selection = 0
+        self.debut_tour()
 
     def debut_tour(self):
         """
@@ -100,6 +123,7 @@ class Combat(Action):
         Gère la durée des effets.
         """
         perso = self.tour
+        skip_tour = False
 
         effets = perso["effets"]
         for nom_effet, effet in effets:
@@ -110,18 +134,28 @@ class Combat(Action):
                     perso["attributs"]["vie"] += perso["attributs"]["vie_max"] * (
                             effet[0] * 5 / 100)  # soigner 5% de la vie max par niveau de regeneration
                 case "etourdissement":
-                    self.prochain_tour()
-                    del effets[nom_effet]
-                    continue  # finir l'itération pour éviter toute erreur puisque l'on retire l'effet
+                    skip_tour = True
+                    del effets["etourdissement"]
 
             if effet[1] > 0:
                 effets[nom_effet][1] -= 1
             if effets[nom_effet][1] == 0:
                 del effets[nom_effet]
 
+        if skip_tour:
+            self.prochain_tour()
+        else:
+            self.action = "selection"
+
     def calcul_degats(self, attaquant, cible):
-        degats = attaquant["arme"].get("degats", 1) + attaquant["attributs"].get("force", 1)
-        crit = attaquant["arme"].get("critique", 5) + attaquant["attributs"].get("chance", 1) > random.randint(1, 100)
+        arme = attaquant.get("arme")
+        if arme is None:
+            arme = {
+                "degats": 1,
+                "critique": 5
+            }
+        degats = arme.get("degats", 1) + attaquant["attributs"].get("force", 1)
+        crit = arme.get("critique", 5) + attaquant["attributs"].get("chance", 1) > random.randint(1, 100)
         if crit:
             degats *= 2
 
@@ -132,30 +166,32 @@ class Combat(Action):
 
         return degats
 
-    def utiliser_competence(self, personnage, cible=None):
+    def utiliser_competence(self, personnage, cibles=None):
         self.action = "attaque"
-        self.jeu.equipe.get_personnage(personnage.nom).utiliser_competence(self, self.competence_en_cours, cible)
+        self.jeu.equipe.get_personnage(personnage.nom).utiliser_competence(self, self.competence_en_cours, cibles)
 
     def changer_menu(self, menu):
         self.menu_actuel = menu
         self.selection = 0
 
-    def update_tour_ennemi(self, events):
-        pass
+    def update_ennemi(self, events):
+        ennemi = self.tour
 
-    def update_tour_joueur(self, events):
+        if self.action == "selection":
+            pass
+        elif self.action == "attaque":
+            pass
+
+    def update_selection(self, events):
         perso_actuel = self.tour
         ennemis_vivants = [index for index, ennemi in enumerate(self.ennemis) if ennemi["vie"] > 0]
 
         if self.menu_actuel == "principal":
+
+            self.options = range(3 if "silence" not in perso_actuel["effets"] else 2)
             for event in events:
-                max_selection = 3 if "silence" not in perso_actuel["effets"] else 2
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_DOWN:
-                        self.selection = (self.selection + 1) % max_selection
-                    elif event.key == pygame.K_UP:
-                        self.selection = (self.selection - 1) % max_selection
-                    elif event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE:
                         match self.selection:
                             case 0:
                                 self.changer_menu("attaque")
@@ -165,13 +201,11 @@ class Combat(Action):
                                 self.changer_menu("competences")
 
         elif self.menu_actuel == "attaque":
+
+            self.options = ennemis_vivants
             for event in events:
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_DOWN:
-                        self.selection = (self.selection + 1) % len(ennemis_vivants)
-                    elif event.key == pygame.K_UP:
-                        self.selection = (self.selection - 1) % len(ennemis_vivants)
-                    elif event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE:
                         ennemi = self.ennemis[ennemis_vivants[self.selection]]
                         degats = self.calcul_degats(perso_actuel, ennemi)
                         ennemi["vie"] -= degats
@@ -181,19 +215,15 @@ class Combat(Action):
                         self.changer_menu("principal")
 
         elif self.menu_actuel == "items":
-            items_disponibles = {
-                identifiant: quantite for identifiant, quantite in self.jeu.equipe.inventaire.values()
+            items_disponibles = [
+                (id, qte) for id, qte in self.jeu.equipe.inventaire.items()
                 if (item_data := self.jeu.loader.items.get(id)) and item_data.get("type", "") == "consommable"
-                #             ^ assigne et vérifie item_data
-            }
+            ]
+            self.options = items_disponibles
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if len(items_disponibles) > 0:
-                        if event.key == pygame.K_DOWN:
-                            self.selection = (self.selection + 1) % len(items_disponibles)
-                        elif event.key == pygame.K_UP:
-                            self.selection = (self.selection - 1) % len(items_disponibles)
-                        elif event.key == pygame.K_SPACE:
+                        if event.key == pygame.K_SPACE:
                             pass
                         elif event.key == pygame.K_ESCAPE:
                             self.changer_menu("principal")
@@ -202,40 +232,67 @@ class Combat(Action):
 
         elif self.menu_actuel == "competences":
             competences = perso_actuel["competences"]
+            self.options = competences
             for event in events:
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_DOWN:
-                        self.selection = (self.selection + 1) % len(competences)
-                    elif event.key == pygame.K_UP:
-                        self.selection = (self.selection - 1) % len(competences)
-                    elif event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE:
                         competence_selectionnee = competences[self.selection]
                         cible_type = competence_selectionnee.get("cible")
                         self.competence_en_cours = competence_selectionnee
                         if cible_type is None:
-                            pass
+                            self.select_competence(competence_selectionnee)
                         elif cible_type == "ennemi":
                             self.changer_menu("cible_ennemi")
                     elif event.key == pygame.K_ESCAPE:
                         self.changer_menu("principal")
-
         elif self.menu_actuel == "cible_ennemi":
+            self.options = ennemis_vivants
             for event in events:
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_DOWN:
-                        self.selection = (self.selection + 1) % len(ennemis_vivants)
-                    elif event.key == pygame.K_UP:
-                        self.selection = (self.selection - 1) % len(ennemis_vivants)
-                    elif event.key == pygame.K_SPACE:
-                        pass
+                    if event.key == pygame.K_SPACE:
+                        self.select_competence(self.competence_en_cours, ennemis_vivants[self.selection])
                     elif event.key == pygame.K_ESCAPE:
                         self.changer_menu("competences")
 
+    def update_anim_personnages(self):
+        for perso in self.personnages:
+            perso_obj = self.jeu.equipe.get_personnage(perso["nom"])
+            if perso_obj:
+                perso_obj.update(
+                    state=perso_obj.action,
+                    a_distance=perso.get("a_distance", False),
+                    target=perso_obj.target
+                )
+
+    def select_competence(self, competence_id, target=None):
+        if self.action_en_cours:
+            return
+        self.jeu.equipe.get_personnage(self.tour["nom"]).utiliser_competence(competence_id, target)
+        self.action_en_cours = True
+
+    def on_hit(self, attacker, target):
+        degats = self.calcul_degats(attacker, target)
+        target["vie"] -= degats
+
     def update(self, events):
-        if self.tour["type"] == "ennemi":
-            self.update_tour_ennemi(events)
-        elif self.tour["type"] == "personnage" and self.action == "selection":
-            self.update_tour_joueur(events)
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN:
+                    self.selection = (self.selection + 1) % len(self.options)
+                elif event.key == pygame.K_UP:
+                    self.selection = (self.selection - 1) % len(self.options)
+
+        if self.tour["type"] == "personnage":
+            match self.action:
+                case "selection":
+                    self.update_selection(events)
+                case "attaque":
+                    # TODO
+                    pass
+        elif self.tour["type"] == "ennemi":
+            self.update_ennemi(events)
+
+        self.update_anim_personnages()
 
     # AFFICHAGE
 
@@ -272,11 +329,185 @@ class Combat(Action):
 
         pygame.draw.line(self.jeu.ui_surface, (245, 205, 0), (pos[0], pos[1]), (pos[0], pos[1] + 20), 2)
 
+    def draw_selection(self, options):
+        option_height = total_height / len(options)
+        for i, option in enumerate(options):
+            color = (255, 255, 255) if i == self.selection else (200, 200, 200)
+            if i == self.selection:
+                pygame.draw.rect(
+                    self.jeu.ui_surface,
+                    couleur_hightlight,
+                    (separator_x + 2, box_y + i * option_height, menu_width - 5, option_height)
+                )
+
+            text_render_centered_left(
+                self.jeu.ui_surface,
+                option,
+                "bold" if i == self.selection else "regular",
+                color,
+                (separator_x + 20, box_y + i * option_height + option_height / 2),
+                size=22
+            )
+
     def draw_menu(self):
-        pass
+
+        pygame.draw.rect(
+            self.jeu.ui_surface,
+            (0, 0, 0),
+            (box_x - 3, box_y - 3, box_width + 6, total_height + 6),
+        )
+        pygame.draw.line(
+            self.jeu.ui_surface,
+            (0, 0, 0, 150),
+            (separator_x, box_y + 2),
+            (separator_x, box_y + total_height - 4),
+            2
+        )
+
+        text_render_centered_left(
+            self.jeu.ui_surface,
+            self.tour["nom"],
+            "bold",
+            (255, 255, 255),
+            (box_x + 7, box_y + 20),
+            size=26
+        )
+
+        # vie
+        ratio_vie = self.tour["attributs"]['vie'] / self.tour["attributs"]['vie_max']
+        text_render_centered_left(
+            self.jeu.ui_surface,
+            f"Vie : {self.tour["attributs"]['vie']}/{self.tour["attributs"]['vie_max']}",
+            "imregular",
+            (200, 200, 200),
+            (box_x + 7, box_y + 50),
+            size=18
+        )
+
+        # barre de vie
+        bar_width = 180
+        bar_height = 20
+        pygame.draw.rect(
+            self.jeu.ui_surface,
+            (50, 50, 50),
+            (box_x + 5, box_y + 63, bar_width + 4, bar_height + 4)
+        )
+        pygame.draw.rect(
+            self.jeu.ui_surface,
+            (255, 0, 0) if ratio_vie > 0.5 else (255, 165, 0) if ratio_vie > 0.25 else (139, 0, 0),
+            (box_x + 7, box_y + 65, bar_width * ratio_vie, bar_height)
+        )
+
+        # pa
+        max_pa = 8
+        text_render_centered_left(
+            self.jeu.ui_surface,
+            f"PA : {self.tour['pa']}/{max_pa}",
+            "imregular",
+            (200, 200, 200),
+            (box_x + 7, box_y + 110),
+            size=18
+        )
+
+        pa_ratio = self.tour['pa'] / max_pa
+        pygame.draw.rect(
+            self.jeu.ui_surface,
+            (50, 50, 50),
+            (box_x + 5, box_y + 123, bar_width + 4, bar_height + 4)
+        )
+        pygame.draw.rect(
+            self.jeu.ui_surface,
+            (21, 169, 232),
+            (box_x + 7, box_y + 125, bar_width * pa_ratio, bar_height)
+        )
+        for i in range(max_pa):
+            ratio = i / max_pa * bar_width
+            pygame.draw.line(
+                self.jeu.ui_surface,
+                (0, 0, 0),
+                (box_x + 5 + ratio, box_y + 125),
+                (box_x + 5 + ratio, box_y + 125 + bar_height),
+            )
+
+        match self.menu_actuel:
+            case "principal":
+
+                options = ["Attaque", "Items", "Compétences"]
+                if "silence" in self.tour["effets"]:
+                    options = ["Attaque", "Items"]
+                self.draw_selection(options)
+
+            case "attaque":
+
+                ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
+                self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
+
+            case "items":
+
+                items_disponibles = [
+                    (id, qte) for id, qte in self.jeu.equipe.inventaire.items()
+                    if (item_data := self.jeu.loader.items.get(id)) and item_data.get("type", "") == "consommable"
+                ]
+                if not items_disponibles:
+                    text_render_centered_left(
+                        self.jeu.ui_surface,
+                        "Aucun objet utilisable",
+                        "imitalic",
+                        (150, 150, 150),
+                        (separator_x + 20, box_y + 37),
+                        size=18
+                    )
+                else:
+                    option_height = total_height / len(items_disponibles)
+                    for i, (item_id, qte) in enumerate(items_disponibles):
+                        item_data = self.jeu.loader.items.get(item_id)
+                        color = (255, 255, 255) if i == self.selection else (200, 200, 200)
+                        if i == self.selection:
+                            pygame.draw.rect(
+                                self.jeu.ui_surface,
+                                couleur_hightlight,
+                                (separator_x + 2, box_y + i * option_height, menu_width - 5, option_height)
+                            )
+                        text_render_centered_left(
+                            self.jeu.ui_surface,
+                            f"{item_data['nom']} x{qte}",
+                            "bold" if i == self.selection else "regular",
+                            color,
+                            (separator_x + 20, box_y + i * option_height + option_height / 2),
+                            size=18
+                        )
+
+            case "competences":
+
+                competences = self.tour["competences"]
+                self.draw_selection([comp["nom"] for comp in competences])
+
+            case "cible_ennemi":
+
+                ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
+                self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
 
     def draw_ui(self):
-        pass
+        # menu
+        if self.action == "selection" and self.tour["type"] == "personnage":
+            self.draw_menu()
 
     def draw(self):
         self.draw_ui()
+
+        for perso in self.personnages:
+            perso_obj = self.jeu.equipe.get_personnage(perso["nom"])
+            if perso_obj:
+                perso_obj.draw()
+
+        if self.tour and self.tour.get("attacking", False):
+            attacker = self.jeu.equipe.get_personnage(self.tour["nom"])
+            target = self.tour.get("target")
+            if attacker and target:
+                target_obj = self.jeu.equipe.get_personnage(target)
+                if target_obj:
+                    original_pos = attacker.rect.copy()
+                    if not self.tour.get("a_distance", False):
+                        attacker.move(target_obj.rect.x - 50, target_obj.rect.y)
+                    attacker.draw()
+                    attacker.rect = original_pos
