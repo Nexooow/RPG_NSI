@@ -1,5 +1,5 @@
 {
-    "type":"event-negatif",
+    "type":"event",
     "id":"meteore",
     "run":[
         {
@@ -7,6 +7,10 @@
             "lines":[
                 "Ô météore, démon des cieux et famille du diable"
             ]
+        },
+        {
+            "type":"execution",
+            "code":"jeu.equipe.chance-=5"
         }
     ]
 }

@@ -152,6 +152,7 @@ class Personnage:
                 self.frame_index = len(self.animation_list[self.action]) - 1
             else:
                 self.frame_index = 0
+                """
                 if self.action == 3 or self.action == 4:
                     self.attacking = False
                     self.attack_cooldown = 20
@@ -159,6 +160,8 @@ class Personnage:
                     self.hit = False
                     self.attacking = False
                     self.attack_cooldown = 20
+                #Inutile ici
+                """
                 self.update_action(0)
         if self.attacking and not self.has_hit:
             if self.frame_index in self.attack_frame[self.action]:

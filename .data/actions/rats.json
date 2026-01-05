@@ -1,5 +1,5 @@
 {
-    "type":"event-negatif",
+    "type":"event",
     "run":[{
         "type":"conditon",
         "code":"jeu.equipe.argent>=10",
