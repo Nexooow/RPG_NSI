@@ -30,9 +30,7 @@ class Accueil(Menu):
         self.ouvrir()
 
     def ouvrir(self):
-        pygame.mixer.music.load("./assets/music/intro.mp3")
-        pygame.mixer.music.set_volume(0.01)
-        pygame.mixer.music.play(-1)
+        self.jeu.jouer_musique("intro", loop=True, volume=0.01)
         self.jeu.fade = 255
 
     def fermer(self):

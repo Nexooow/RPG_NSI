@@ -1,39 +1,18 @@
 import json
 import pygame
+import typing
 
-from base.Personnage import Vous, Barman
-from base.action import Action, Deplacement, AjoutTemps, Combat, SelectionAction
-from base.JSONLoader import JSONLoader
+from base.Personnage import Barman
+from base.action import Action, Deplacement, AjoutTemps, SelectionAction
+from base.Loader import Loader
 from base.Equipe import Equipe
 
+from lib.config import sommets, aretes, positions_sommets, musiques_regions
 from lib.file import File
 from lib.graph import Graph
 from lib.render import text_render_centered
 
 from menu.accueil import Accueil
-from menu.carte import Carte
-from menu.inventaire import Inventaire
-
-sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
-aretes = [
-    ("Auberge", "Mountain", 45),
-    ("Mountain", "Ceilidh", 33),
-    ("Mountain", "Auberge", 45),
-    ("Mountain", "Elder Tree", 12),
-    ("Ceilidh", "Mountain", 33),
-    ("Ceilidh", "Auberge", 34),
-    ("Auberge", "Elder Tree", 25),
-    ("Auberge", "Ceilidh", 34),
-    ("Auberge", "Dawn of the world", 19),
-    ("Dawn of the world", "Auberge", 19),
-]
-positions_sommets = {
-    "Auberge": (200, 400),
-    "Mountain": (600, 120),
-    "Ceilidh": (660, 480),
-    "Dawn of the world": (450, 500),
-    "Elder Tree": (500, 260),
-}
 
 
 class Jeu:
@@ -46,30 +25,26 @@ class Jeu:
         self.running = True
         self.debute = False  # si le jeu a débuté ou non
 
-        self.menu = Accueil(self)
-
         self.clock = pygame.time.Clock()
-        self.loader = JSONLoader(self)
-
         self.fond = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
         self.ui_surface = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
         self.filter_surface = pygame.Surface((self.WIDTH, self.HEIGHT), pygame.SRCALPHA)
+        self.musique_actuelle = None
+
+        self.menu = Accueil(self)
+        self.loader = Loader(self)
 
         # carte et regions/lieux
         self.carte = Graph(sommets, aretes, True, positions_sommets)
-
         self.equipe = Equipe(self)
-
         self.variables_jeu = {}  # variables utilisés par certaines actions (exemple : stock des boutiques ...)
-
-        self.action_actuelle: Action | None = None
-        self.actions = File()
-
         self.regions = self.loader.charger_regions()
         self.region = "Auberge"
         self.lieu = self.regions["Auberge"].entree
-
         self.temps = 24 + 12
+
+        self.action_actuelle: typing.Optional[Action] = None
+        self.actions = File()
 
         # filtres pour affichage
         self.fade = 300
@@ -103,12 +78,11 @@ class Jeu:
         else:
             # self.equipe.ajouter_personnage(Vous(self.equipe))
             self.equipe.ajouter_personnage(Barman(self.equipe))
-        self.executer_sequence("test_combat")
-        #self.sauvegarder()
+        # self.executer_sequence("test_combat")
 
     def restaurer(self, save_json):
         self.region = save_json["region"]
-        self.lieu = self.regions[self.region]
+        self.lieu = save_json["lieu"]
         self.temps = save_json["temps"]
         self.equipe.restaurer(save_json["equipe"])
         self.variables_jeu = save_json["variables_jeu"]
@@ -146,23 +120,31 @@ class Jeu:
         elif self.action_actuelle is not None:
             self.action_actuelle.update(evenements)
 
+    def action_suivante(self):
+        self.action_actuelle = self.actions.defiler()
+        self.action_actuelle.executer()
+
     def executer(self):
         if self.action_actuelle is None:
             if not self.actions.est_vide():
-                self.action_actuelle = self.actions.defiler()
-                assert self.action_actuelle is not None
-                self.action_actuelle.executer()
+                self.action_suivante()
             elif self.debute:
                 self.action_actuelle = SelectionAction(self, {"type": "selection-action"})
                 self.action_actuelle.executer()
         else:
             if self.action_actuelle.get_complete():
                 if not self.actions.est_vide():
-                    self.action_actuelle = self.actions.defiler()
-                    assert self.action_actuelle is not None
-                    self.action_actuelle.executer()
+                    self.action_suivante()
                 else:
                     self.action_actuelle = None
+
+        if self.action_actuelle is not None and not self.action_actuelle.utilise_musique:
+            region_actuelle = self.get_region_actuelle()
+            if region_actuelle is not None:
+                musique_region = musiques_regions.get(region_actuelle.nom, None)
+                self.jouer_musique(musique_region, loop=True, volume=0.07)
+            else:
+                self.jouer_musique(None)
 
     def scene(self):
         if self.menu is not None:
@@ -285,6 +267,22 @@ class Jeu:
             )
             self.fade -= 2
 
+    def jouer_musique(self, musique, loop=True, volume=0.25):
+        """
+        Démarre une musique en boucle si elle n'est pas déjà en cours de lecture (pour éviter les coupures)
+        :param musique: Le nom du fichier musique, rien pour arrêter la musique
+        :param loop: Booléen, si la musique doit être en boucle ou non
+        :param volume: Volume de la musique (0.0 à 1.0)
+        """
+        if musique is None or musique == "":
+            pygame.mixer.music.stop()
+            return
+        if self.musique_actuelle != musique:
+            pygame.mixer.music.load(f"./assets/music/{musique}.mp3")
+            pygame.mixer.music.play(-1 if loop else 0)
+            pygame.mixer.music.set_volume(volume)
+            self.musique_actuelle = musique
+
     # GESTION ACTIONS
 
     def interagir(self, npc=None):
@@ -292,10 +290,9 @@ class Jeu:
             npc = self.lieu
         if f"{npc}:rencontre" not in self.variables_jeu and self.loader.get_sequence(f"{npc}:rencontre"):
             self.executer_sequence(npc + ":rencontre")
-        self.executer_sequence(npc + ":interaction")
-        print(f"interaction {npc}")
-        print(self.actions)
-        self.variables_jeu[f"{npc}:rencontre"] = True
+            self.variables_jeu[f"{npc}:rencontre"] = True
+        else:
+            self.executer_sequence(npc + ":interaction")
 
     def ajouter_action(self, action):
         assert isinstance(action,
@@ -325,7 +322,7 @@ class Jeu:
 
     # DEPLACEMENTS
 
-    def simuler_segment(self, temps, r_dest, l_dest, simulation_temps, destination=False):
+    def simuler_segment(self, temps, region_dest, lieu_dest, simulation_temps, destination=False):
         for _ in range(temps):
 
             chance = self.equipe.chance
@@ -342,8 +339,8 @@ class Jeu:
 
         self.ajouter_action(
             Deplacement(self, {
-                "region": r_dest,
-                "lieu": l_dest,
+                "region": region_dest,
+                "lieu": lieu_dest,
                 "type": "deplacement",
                 "destination": destination
             })

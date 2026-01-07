@@ -21,14 +21,13 @@ class SelectionAction(Action):
     def update(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                match self.option_choisie:
-                    case 0:
-                        self.complete = True
-                        self.jeu.interagir()
-                    case 1:
-                        self.jeu.ouvrir_menu(Inventaire(self.jeu))
-                    case 2:
-                        self.jeu.ouvrir_menu(Carte(self.jeu))
+                if self.option_choisie == 0:
+                    self.complete = True
+                    self.jeu.interagir()
+                elif self.option_choisie == 1:
+                    self.jeu.ouvrir_menu(Inventaire(self.jeu))
+                elif self.option_choisie == 2:
+                    self.jeu.ouvrir_menu(Carte(self.jeu))
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                 self.option_choisie = (self.option_choisie + 1) % len(self.options)
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:

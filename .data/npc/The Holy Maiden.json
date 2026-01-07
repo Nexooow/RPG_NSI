@@ -43,7 +43,7 @@
                 "1": [
                     {
                         "type": "execution",
-                        "code": "jeu.variables_jeu['Termine'] = true"
+                        "code": "jeu.variables_jeu['Termine'] = True"
                     }
                 ],
                 "2": [

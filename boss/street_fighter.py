@@ -44,7 +44,7 @@ class StreetFighter(Action):
         )
 
     def draw_bg(self):
-        background = pygame.image.load("images.jpg").convert_alpha()
+        background = pygame.image.load("./assets/sprites/images.jpg").convert_alpha()
         background = pygame.transform.scale(background, 100)
         self.jeu.fond.blit(background, (0, 0))
 

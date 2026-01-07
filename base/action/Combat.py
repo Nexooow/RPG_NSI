@@ -58,6 +58,9 @@ class Combat(Action):
         super().__init__(jeu, data)
         self.desactive_ui = True
 
+        self.musique = data.get("musique", None)
+        self.utilise_musique = self.musique is not None
+
         self.tours = File()
         self.tour = None
         self.action = None
@@ -119,7 +122,7 @@ class Combat(Action):
 
     def debut_tour(self):
         """
-        Applique les effets sur le joueur au début du tour.
+        Applique les effets sur le joueur/ennemi au début du tour.
         Gère la durée des effets.
         """
         perso = self.tour
@@ -139,6 +142,7 @@ class Combat(Action):
 
             if effet[1] > 0:
                 effets[nom_effet][1] -= 1
+
             if effets[nom_effet][1] == 0:
                 del effets[nom_effet]
 
@@ -250,12 +254,12 @@ class Combat(Action):
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        target_dict=self.ennemis[ennemis_vivants[self.selection]]
-                        target_obj=self.jeu.equipe.get_personnage(target_dict["nom"])
+                        target_dict = self.ennemis[ennemis_vivants[self.selection]]
+                        target_obj = self.jeu.equipe.get_personnage(target_dict["nom"])
 
                         self.select_competence(self.competence_en_cours["id"], target_dict)
-                        attacker_obj=self.jeu.equipe.get_personnage(self.tour["nom"])
-                        attacker_obj.target=target_obj
+                        attacker_obj = self.jeu.equipe.get_personnage(self.tour["nom"])
+                        attacker_obj.target = target_obj
                     elif event.key == pygame.K_ESCAPE:
                         self.changer_menu("competences")
 
@@ -450,8 +454,9 @@ class Combat(Action):
             case "items":
 
                 items_disponibles = [
-                    (id, qte) for id, qte in self.jeu.equipe.inventaire.items()
-                    if (item_data := self.jeu.loader.items.get(id)) and item_data.get("type", "") == "consommable"
+                    (identifiant, qte) for identifiant, qte in self.jeu.equipe.inventaire.items()
+                    if
+                    (item_data := self.jeu.loader.items.get(identifiant)) and item_data.get("type", "") == "consommable"
                 ]
                 if not items_disponibles:
                     text_render_centered_left(
@@ -498,7 +503,7 @@ class Combat(Action):
             self.draw_menu()
 
     def draw(self):
-        
+
         self.draw_ui()
         for perso in self.personnages:
             perso_obj = self.jeu.equipe.get_personnage(perso["nom"])
@@ -516,4 +521,3 @@ class Combat(Action):
                         attacker.move(target_obj.rect.x - 50, target_obj.rect.y)
                     attacker.draw()
                     attacker.rect = original_pos
-        
