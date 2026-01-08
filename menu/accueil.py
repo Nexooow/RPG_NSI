@@ -156,7 +156,7 @@ class Accueil(Menu):
             jours, heures = divmod(save["temps"], 24)
             text_render_centered(
                 self.jeu.fond,
-                f"{jours} {heures:02d}h - {save["region"]} {save["lieu"]}",
+                f"{jours} {heures:02d}h - {save['region']} {save['lieu']}",
                 "regular",
                 color=(245, 205, 0, 185),
                 pos=(1000 / 2, 175 + 25 + 50 * (index + 1)),

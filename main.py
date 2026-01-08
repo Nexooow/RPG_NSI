@@ -1,9 +1,11 @@
 print("⚠️ La console ne sert qu'à déboguer le jeu.")
 
 import pygame
+import os
 
 pygame.init()
 pygame.mixer.init()
+pygame.mixer.music.fadeout(125)
 pygame.display.set_caption("Game Name")
 
 screen = pygame.display.set_mode((1000, 700))
@@ -11,6 +13,10 @@ screen = pygame.display.set_mode((1000, 700))
 from Jeu import Jeu
 
 if __name__ == "__main__":
+    
+    saves_dir_exists = os.path.isdir(".data/saves/")
+    if not saves_dir_exists:
+        os.mkdir(".data/saves/")
 
     jeu = Jeu()
 

@@ -106,7 +106,6 @@ class Jeu:
             "actions": actions,
             "action_actuelle": self.action_actuelle.data if self.action_actuelle else None
         }
-        # print(f"Sauvegarde de la partie avec l'identifiant {self.identifiant}")
         json.dump(data, open(f"./.data/saves/{self.identifiant}.json", "w"))
 
     def quitter(self):

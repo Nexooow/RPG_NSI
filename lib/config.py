@@ -20,9 +20,9 @@ positions_sommets = {
 }
 
 musiques_regions = {
-    "Auberge": "",
-    "Mountain": "",
-    "Ceilidh": "",
-    "Dawn of the world": "",
+    "Auberge": "kcd2_tavern6",
+    "Mountain": "towering_mountain_immortals_fenyx_rising",
+    "Ceilidh": "elden_ring_caelid",
+    "Dawn of the world": "clair_obscur_yellow_forest",
     "Elder Tree": "clair_obscur_linen_and_cotton",
 }
