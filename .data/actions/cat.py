@@ -45,6 +45,10 @@
               "Oh le vilain!",
               "Frapper un chat sans défense!"
             ]
+          },
+          {
+            "type":"execution",
+            "code":"jeu.equipe.infliger(5)"
           }
         ]
       }
