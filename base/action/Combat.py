@@ -130,15 +130,14 @@ class Combat(Action):
 
         effets = perso["effets"]
         for nom_effet, effet in effets:
-            match nom_effet:
-                case "brulure":
-                    perso["attributs"]["vie"] -= effet[0]
-                case "regeneration":
-                    perso["attributs"]["vie"] += perso["attributs"]["vie_max"] * (
+            if nom_effet == "brulure":
+                perso["attributs"]["vie"] -= effet[0]
+            elif nom_effet == "regeneration":
+                perso["attributs"]["vie"] += perso["attributs"]["vie_max"] * (
                             effet[0] * 5 / 100)  # soigner 5% de la vie max par niveau de regeneration
-                case "etourdissement":
-                    skip_tour = True
-                    del effets["etourdissement"]
+            elif nom_effet == "etourdissement":
+                skip_tour = True
+                del effets["etourdissement"]
 
             if effet[1] > 0:
                 effets[nom_effet][1] -= 1
@@ -196,13 +195,12 @@ class Combat(Action):
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        match self.selection:
-                            case 0:
-                                self.changer_menu("attaque")
-                            case 1:
-                                self.changer_menu("items")
-                            case 2:
-                                self.changer_menu("competences")
+                        if self.selection == 0:
+                            self.changer_menu("attaque")
+                        elif self.selection == 1:
+                            self.changer_menu("items")
+                        elif self.selection == 2:
+                            self.changer_menu("competences")
 
         elif self.menu_actuel == "attaque":
 
@@ -290,14 +288,11 @@ class Combat(Action):
                     self.selection = (self.selection + 1) % len(self.options)
                 elif event.key == pygame.K_UP:
                     self.selection = (self.selection - 1) % len(self.options)
-
         if self.tour["type"] == "personnage":
-            match self.action:
-                case "selection":
-                    self.update_selection(events)
-                case "attaque":
-                    # TODO
-                    pass
+            if self.action == "selection":
+                self.update_selection(events)
+            if self.action == "attaque":
+                pass
         elif self.tour["type"] == "ennemi":
             self.update_ennemi(events)
 
@@ -386,7 +381,7 @@ class Combat(Action):
         ratio_vie = self.tour["attributs"]['vie'] / self.tour["attributs"]['vie_max']
         text_render_centered_left(
             self.jeu.ui_surface,
-            f"Vie : {self.tour["attributs"]['vie']}/{self.tour["attributs"]['vie_max']}",
+            f"Vie : {self.tour['attributs']['vie']}/{self.tour['attributs']['vie_max']}",
             "imregular",
             (200, 200, 200),
             (box_x + 7, box_y + 50),
@@ -437,65 +432,64 @@ class Combat(Action):
                 (box_x + 5 + ratio, box_y + 125),
                 (box_x + 5 + ratio, box_y + 125 + bar_height),
             )
-
-        match self.menu_actuel:
-            case "principal":
-
-                options = ["Attaque", "Items", "Compétences"]
-                if "silence" in self.tour["effets"]:
-                    options = ["Attaque", "Items"]
-                self.draw_selection(options)
-
-            case "attaque":
-
-                ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
-                self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
-
-            case "items":
-
-                items_disponibles = [
-                    (identifiant, qte) for identifiant, qte in self.jeu.equipe.inventaire.items()
-                    if
-                    (item_data := self.jeu.loader.items.get(identifiant)) and item_data.get("type", "") == "consommable"
-                ]
-                if not items_disponibles:
+            
+        if self.menu_actuel == "principal":
+            
+            options = ["Attaque", "Items", "Compétences"]
+            if "silence" in self.tour["effets"]:
+                options = ["Attaque", "Items"]
+            self.draw_selection(options)
+        
+        elif self.menu_actuel == "attaque":
+            
+            ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
+            self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
+            
+        elif self.menu_actuel == "items":
+            
+            items_disponibles = [
+                (identifiant, qte) for identifiant, qte in self.jeu.equipe.inventaire.items()
+                if
+                (item_data := self.jeu.loader.items.get(identifiant)) and item_data.get("type", "") == "consommable"
+            ]
+            if not items_disponibles:
+                text_render_centered_left(
+                    self.jeu.ui_surface,
+                    "Aucun objet utilisable",
+                    "imitalic",
+                    (150, 150, 150),
+                    (separator_x + 20, box_y + 37),
+                    size=18                    
+                )
+            else:
+                option_height = total_height / len(items_disponibles)
+                for i, (item_id, qte) in enumerate(items_disponibles):
+                    item_data = self.jeu.loader.items.get(item_id)
+                    color = (255, 255, 255) if i == self.selection else (200, 200, 200)
+                    if i == self.selection:
+                        pygame.draw.rect(
+                            self.jeu.ui_surface,
+                            couleur_hightlight,
+                            (separator_x + 2, box_y + i * option_height, menu_width - 5, option_height)
+                        )
                     text_render_centered_left(
                         self.jeu.ui_surface,
-                        "Aucun objet utilisable",
-                        "imitalic",
-                        (150, 150, 150),
-                        (separator_x + 20, box_y + 37),
+                        f"{item_data['nom']} x{qte}",
+                        "bold" if i == self.selection else "regular",
+                        color,
+                        (separator_x + 20, box_y + i * option_height + option_height / 2),
                         size=18
                     )
-                else:
-                    option_height = total_height / len(items_disponibles)
-                    for i, (item_id, qte) in enumerate(items_disponibles):
-                        item_data = self.jeu.loader.items.get(item_id)
-                        color = (255, 255, 255) if i == self.selection else (200, 200, 200)
-                        if i == self.selection:
-                            pygame.draw.rect(
-                                self.jeu.ui_surface,
-                                couleur_hightlight,
-                                (separator_x + 2, box_y + i * option_height, menu_width - 5, option_height)
-                            )
-                        text_render_centered_left(
-                            self.jeu.ui_surface,
-                            f"{item_data['nom']} x{qte}",
-                            "bold" if i == self.selection else "regular",
-                            color,
-                            (separator_x + 20, box_y + i * option_height + option_height / 2),
-                            size=18
-                        )
-
-            case "competences":
-
-                competences = self.tour["competences"]
-                self.draw_selection([comp["nom"] for comp in competences])
-
-            case "cible_ennemi":
-
-                ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
-                self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
+                    
+        elif self.menu_actuel == "competence":
+            
+            competences = self.tour["competences"]
+            self.draw_selection([comp["nom"] for comp in competences])
+            
+        elif self.menu_actuel == "cible_ennemi":
+            
+            ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
+            self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
 
     def draw_ui(self):
         # menu

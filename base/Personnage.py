@@ -15,6 +15,9 @@ class Personnage:
 
         self.niveau = 1
         self.xp = 0
+        
+        self.points_competences = 0
+        self.points_attributs = 0
 
         self.attributs = {
             "vie_max": 100,
@@ -70,6 +73,15 @@ class Personnage:
             "competences_equipes": self.competences_equipes,
             "competences_debloques": self.competences_debloques
         }
+        
+    def ajouter_xp (self, xp):
+        self.xp += xp
+        if self.xp > xp_par_niveaux[self.niveau+1]:
+            self.xp = self.xp-xp_par_niveaux[self.niveau+1]
+            self.niveau += 1
+            self.points_attributs += 3
+            self.points_competences += 1
+            
 
     def get_attributs(self):
         attributs = self.attributs.copy()

@@ -1,11 +1,11 @@
 from base.Personnage import Personnage, Barman, Fachan, Vous
+import typing
 
 classes_personnages = {
     "Barman": Barman,
     "Vous": Vous,
     "Fachan": Fachan
 }
-
 
 class Equipe:
 
@@ -16,7 +16,7 @@ class Equipe:
         self.personnages: list[Personnage] = []  # Liste des personnages dans l'équipe (c.-à-d. débloqués)
         self.inventaire = {}
 
-    def get_personnage(self, nom) -> Personnage | None:
+    def get_personnage(self, nom) -> typing.Optional[Personnage]:
         for personnage in self.personnages:
             if personnage.nom == nom:
                 return personnage
