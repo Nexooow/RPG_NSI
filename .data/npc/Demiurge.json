@@ -1,1 +1,5 @@
-{"id": "Demiurge", "nom": "Demiurge", "rencontre": [], "interaction": []}
+{"id": "Demiurge", "nom": "Demiurge", "rencontre": [
+  {
+    "type":"street-fighter"
+  }
+], "interaction": []}
