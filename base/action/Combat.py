@@ -184,8 +184,16 @@ class Combat(Action):
         if self.action == "selection":
 
             attaque = random.choice(ennemi["attaques"])
+            cible = random.choice(
+                [perso for perso in self.personnages if perso["attributs"]["vie"] > 0]
+            )
             self.attaques = [
-                {**action, "focus": False, "processed": False}
+                {
+                    **action,
+                    "cible": self.personnages.index(cible) if "cible" not in action else None,
+                    "focus": False,
+                    "processed": False
+                }
                 for action in attaque["actions"]
             ]
             self.sub_frame_count = 0
@@ -205,6 +213,10 @@ class Combat(Action):
 
                 if attaque["w_end"] <= self.sub_frame_count:
                     attaque["processed"] = True
+                    cible = self.personnages[attaque["cible"]]
+                    if cible:
+                        if "degats" in attaque:
+                            cible["vie"] -= attaque["degats"]
                     # TODO: appliquer l'attaque (dégâts, effets, etc...)
                     continue
 
