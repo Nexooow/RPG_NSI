@@ -2,6 +2,7 @@ import pygame
 
 from menu.carte import Carte
 from menu.inventaire import Inventaire
+from menu.competences import MenuCompetences
 from .Action import Action
 from lib.render import text_render_centered_left
 
@@ -28,6 +29,8 @@ class SelectionAction(Action):
                     self.jeu.ouvrir_menu(Inventaire(self.jeu))
                 elif self.option_choisie == 2:
                     self.jeu.ouvrir_menu(Carte(self.jeu))
+                elif self.option_choisie == 3:
+                    self.jeu.ouvrir_menu(MenuCompetences(self.jeu))
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                 self.option_choisie = (self.option_choisie + 1) % len(self.options)
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
@@ -88,6 +91,6 @@ class SelectionAction(Action):
         self.options = [
             f"Intéragir avec {self.jeu.lieu}",
             "Ouvrir l'inventaire",
-            # "Gérer votre équipe",
-            "Ouvrir la carte"
+            "Ouvrir la carte",
+            "Gérer les compétences",
         ]

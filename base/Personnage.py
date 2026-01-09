@@ -15,7 +15,7 @@ class Personnage:
 
         self.niveau = 1
         self.xp = 0
-        
+
         self.points_competences = 0
         self.points_attributs = 0
 
@@ -73,15 +73,14 @@ class Personnage:
             "competences_equipes": self.competences_equipes,
             "competences_debloques": self.competences_debloques
         }
-        
-    def ajouter_xp (self, xp):
+
+    def ajouter_xp(self, xp):
         self.xp += xp
-        if self.xp > xp_par_niveaux[self.niveau+1]:
-            self.xp = self.xp-xp_par_niveaux[self.niveau+1]
+        if self.xp > xp_par_niveaux[self.niveau + 1]:
+            self.xp = self.xp - xp_par_niveaux[self.niveau + 1]
             self.niveau += 1
             self.points_attributs += 3
             self.points_competences += 1
-            
 
     def get_attributs(self):
         attributs = self.attributs.copy()
@@ -316,23 +315,23 @@ class Barman(Personnage):
 
     def utiliser_competence(self, competence_id, target=None):
         if competence_id == "flameche":
-            self.start_attack(action=1,a_distance=True,target=target)
+            self.start_attack(action=1, a_distance=True, target=target)
         elif competence_id == "tournee_generale":
-            self.start_attack(action=0,a_distance=True,target=target)
+            self.start_attack(action=0, a_distance=True, target=target)
         elif competence_id == "flambee":
-            self.start_attack(action=0,a_distance=True,target=target)
+            self.start_attack(action=0, a_distance=True, target=target)
         elif competence_id == "cocktail_molotov":
             self.start_attack(action=1, a_distance=True, target=target)
         elif competence_id == "double_shot":
             self.start_attack(action=1, a_distance=True, target=target)
         elif competence_id == "happy_hour":
-            self.start_attack(action=0,a_distance=True,target=target)
+            self.start_attack(action=0, a_distance=True, target=target)
         elif competence_id == "gueule_de_bois":
-            self.start_attack(action=1,a_distance=True,target=target)
+            self.start_attack(action=1, a_distance=True, target=target)
         elif competence_id == "dernier_verre":
-            self.start_attack(action=1,a_distance=True,target=target)
+            self.start_attack(action=1, a_distance=True, target=target)
         elif competence_id == "shot_enflamme":
-            self.start_attack(action=1,a_distance=True,target=target)
+            self.start_attack(action=1, a_distance=True, target=target)
         elif competence_id == "cuite_explosive":
             pass
 
@@ -441,7 +440,8 @@ class Vous(Personnage):
 
                 }
             },
-            50, 150,
+            50,
+            150,
             [100, 0.6, [0, 0]],
             [pygame.image.load("./assets/sprites/Idle.png"), pygame.image.load("./assets/sprites/Run.png"),
              pygame.image.load("./assets/sprites/Jump.png"),
@@ -466,14 +466,14 @@ class Vous(Personnage):
         elif competence == "broyeur":
             pass
         elif competence == "riposte":
-            self.start_attack(action=0,a_distance=True,target=target)
+            self.start_attack(action=0, a_distance=True, target=target)
         elif competence == "enchainement":
-            self.start_attack(action=3,a_distance=True,target=target)
+            self.start_attack(action=3, a_distance=True, target=target)
         elif competence == "frappe_tactique":
-            self.start_attack(action=3,a_distance=True,target=target)
+            self.start_attack(action=3, a_distance=True, target=target)
         elif competence == "furie_guerriere":
-            self.start_attack(action=1,a_distance=True,target=target)
-            #comme y a pas de frames de apply_attack pour celui-là si jamais ça marche pas faut soit en definir une soit changer pour action=0
+            self.start_attack(action=1, a_distance=True, target=target)
+            # comme y a pas de frames de apply_attack pour celui-là si jamais ça marche pas faut soit en definir une soit changer pour action=0
         elif competence == "execution":
             self.start_attack(action=4, a_distance=True, target=target)
         elif competence == "onde_de_choc":
@@ -535,33 +535,53 @@ class Fachan(Personnage):
                 }
             }
         },
-            50,
-                         450,[100,0.25,[0,0]],[
-            pygame.transform.flip(pygame.transform.scale(pygame.image.load('./assets/sprites/fachan_static_steel.png'),(int((408/1024)*1536),408)),False,True),
-            pygame.transform.flip(pygame.transform.scale(pygame.image.load("./assets/sprites/fachan_static.png"),(int((408/1024)*1536),408)),False,True),
-            pygame.transform.flip(pygame.image.load("./assets/sprites/fachan_attacking.png"),False,True),
-            pygame.transform.flip(pygame.image.load("./assets/sprites/fachan_steelform_attacking.png"),False,True),
-            pygame.transform.flip(pygame.image.load("./assets/sprites/look_for_feet.png"),False,True),
-            pygame.transform.flip(pygame.transform.scale(pygame.image.load("./assets/sprites/look_for_feet_steel.png"),(int((408/100)*97),100),False,True))
-            ],
-        [1,1,3,3,1,1],
-        {0:[0],1:[0],2:[2],3:[2],4:[0],5:[0]},
+                         50,
+                         450, [100, 0.25, [0, 0]], [
+                             pygame.transform.flip(
+                                 pygame.transform.scale(pygame.image.load('./assets/sprites/fachan_static_steel.png'),
+                                                        (int((408 / 1024) * 1536), 408)), False, True),
+                             pygame.transform.flip(
+                                 pygame.transform.scale(pygame.image.load("./assets/sprites/fachan_static.png"),
+                                                        (int((408 / 1024) * 1536), 408)), False, True),
+                             pygame.transform.flip(pygame.image.load("./assets/sprites/fachan_attacking.png"), False,
+                                                   True),
+                             pygame.transform.flip(pygame.image.load("./assets/sprites/fachan_steelform_attacking.png"),
+                                                   False, True),
+                             pygame.transform.flip(pygame.image.load("./assets/sprites/look_for_feet.png"), False,
+                                                   True),
+                             pygame.transform.flip(
+                                 pygame.transform.scale(pygame.image.load("./assets/sprites/look_for_feet_steel.png"),
+                                                        (int((408 / 100) * 97), 100), False, True))
+                         ],
+                         [1, 1, 3, 3, 1, 1],
+                         {0: [0], 1: [0], 2: [2], 3: [2], 4: [0], 5: [0]},
                          data)
-        self.steel_form=False
+        self.steel_form = False
 
     def utiliser_competence(self, combat, competence, cibles=None):
         if competence == "regard_jugeur":
-            self.start_attack(1,a_distance=True,target=cibles) if self.steel_form else self.start_attack(0,a_distance=True,target=cibles)
+            self.start_attack(1, a_distance=True, target=cibles) if self.steel_form else self.start_attack(0,
+                                                                                                           a_distance=True,
+                                                                                                           target=cibles)
         elif competence == "caisteal":
-            self.start_attack(1,a_distance=True,target=cibles) if self.steel_form else self.start_attack(0,a_distance=True,target=cibles)
+            self.start_attack(1, a_distance=True, target=cibles) if self.steel_form else self.start_attack(0,
+                                                                                                           a_distance=True,
+                                                                                                           target=cibles)
         elif competence == "caber":
-            self.start_attack(3,a_distance=True,target=cibles) if self.steel_form else self.start_attack(2,a_distance=True,target=cibles)
+            self.start_attack(3, a_distance=True, target=cibles) if self.steel_form else self.start_attack(2,
+                                                                                                           a_distance=True,
+                                                                                                           target=cibles)
         elif competence == "fureur_de_fachan":
-            self.start_attack(1,a_distance=True,target=cibles) if self.steel_form else self.start_attack(0,a_distance=True,target=cibles)
+            self.start_attack(1, a_distance=True, target=cibles) if self.steel_form else self.start_attack(0,
+                                                                                                           a_distance=True,
+                                                                                                           target=cibles)
         elif competence == "tignasse":
-            self.start_attack(1,a_distance=True,target=cibles) if self.steel_form else self.start_attack(0,a_distance=True,target=cibles)
+            self.start_attack(1, a_distance=True, target=cibles) if self.steel_form else self.start_attack(0,
+                                                                                                           a_distance=True,
+                                                                                                           target=cibles)
         elif competence == "stalin":
-            self.steel_form=True
+            self.steel_form = True
         elif competence == "ou_sont_mes_pieds":
-            self.start_attack(5,a_distance=True,target=cibles) if self.steel_form else self.start_attack(4,a_distance=True,target=cibles)
-
+            self.start_attack(5, a_distance=True, target=cibles) if self.steel_form else self.start_attack(4,
+                                                                                                           a_distance=True,
+                                                                                                           target=cibles)

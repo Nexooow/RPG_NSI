@@ -1,6 +1,6 @@
 import pygame
 import random
-from lib.render import text_render_centered, text_render_centered_left
+from lib.render import text_render_centered_left
 from .Action import Action
 from lib.file import File
 
@@ -16,6 +16,7 @@ couleur_hightlight = (70, 70, 90)
 separator_x = box_x + 400
 
 menu_width = box_width - (separator_x - box_x)
+max_pa = 8
 
 
 def instance_combat(personnage):
@@ -50,6 +51,11 @@ def transformer_ennemi(ennemi):
     return instance
 
 
+def ajouter_pa(combatant):
+    if combatant["pa"] < max_pa:
+        combatant["pa"] += 1
+
+
 class Combat(Action):
     """
     Combat au tour par tour.
@@ -61,10 +67,10 @@ class Combat(Action):
 
         self.musique = data.get("musique", None)
         self.utilise_musique = self.musique is not None
-        
+
         self.fond = data.get("fond", None)
         self.utilise_fond = self.fond is not None
-        
+
         if self.utilise_fond:
             self.fond = pygame.image.load(f"./assets/backgrounds/{self.fond}")
 
@@ -77,7 +83,7 @@ class Combat(Action):
         self.personnages = []
 
         self.attaques = []
-        self.sub_frame_count = None
+        self.sub_frame_count = 0
 
         self.menu_actuel = "principal"
         self.selection = 0
@@ -113,14 +119,15 @@ class Combat(Action):
                 2,
                 max(1, int(vitesse / vitesse_moyenne))  # minimum 1
             )
-            if combatant["type"] == "personnage":
-                instance_index = self.personnages.index(combatant)
-            elif combatant["type"] == "ennemi":
-                instance_index = self.ennemis.index(combatant)
+
+            instance_index = self.personnages.index(combatant) \
+                if combatant["type"] == "personnage" \
+                else self.ennemis.index(combatant)
+
             for _ in range(nombre_tours):
                 self.tours.enfiler([combatant["type"], instance_index])
-                
-    def get_perso_tour (self):
+
+    def get_perso_tour(self):
         tour = self.tour
         if tour[0] == "personnage":
             return self.personnages[tour[1]]
@@ -219,7 +226,6 @@ class Combat(Action):
 
         elif self.action == "attaque":
 
-            self.sub_frame_count += 1
             all_processed = True
             found_focused = False
 
@@ -229,14 +235,12 @@ class Combat(Action):
                     continue
                 all_processed = False
 
+                cible = self.personnages[attaque["cible"]]
+
                 if attaque["w_end"] == self.sub_frame_count:
-                    print("appliquer attaque")
                     attaque["processed"] = True
-                    cible = self.personnages[attaque["cible"]]
                     if cible:
-                        print("cible")
                         if "damage" in attaque:
-                            print(f"appliquer {attaque['damage']}")
                             cible["attributs"]["vie"] -= attaque["damage"]
                     # TODO: appliquer l'attaque (dégâts, effets, etc...)
                     continue
@@ -248,8 +252,8 @@ class Combat(Action):
                     for event in events:
                         if event.type == pygame.KEYDOWN and (event.key == pygame.K_e or event.key == pygame.K_SPACE):
                             if attaque.get("type") == "parry" and attaque["focus"] == True:
-                                print(f"parried at {self.sub_frame_count} (debut fenetre {attaque['w_start']})")
                                 parrysound.play()
+                                ajouter_pa(cible)
                                 attaque["processed"] = True
 
             if all_processed:
@@ -279,9 +283,8 @@ class Combat(Action):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         ennemi = self.ennemis[ennemis_vivants[self.selection]]
-                        degats = self.calcul_degats(perso_actuel, ennemi)
-                        ennemi["vie"] -= degats
-                        perso_actuel["pa"] += 1
+                        ennemi["vie"] -= self.calcul_degats(perso_actuel, ennemi)
+                        ajouter_pa(perso_actuel)
                         self.prochain_tour()
                     elif event.key == pygame.K_ESCAPE:
                         self.changer_menu("principal")
@@ -306,7 +309,6 @@ class Combat(Action):
         elif self.menu_actuel == "competences":
 
             competences = perso_actuel["competences"]
-            print(competences)
             self.options = competences
             for event in events:
                 if event.type == pygame.KEYDOWN:
@@ -357,22 +359,24 @@ class Combat(Action):
         target["vie"] -= degats
 
     def update(self, events):
-        
+
+        self.sub_frame_count += 1
+
         ennemi_vivants = False
         for ennemi in self.ennemis:
             if ennemi["vie"] > 0:
                 ennemi_vivants = True
                 break
-        
+
         personnages_vivants = False
         for perso in self.personnages:
             if perso["attributs"]["vie"] > 0:
                 personnages_vivants = True
                 break
-            
+
         if not personnages_vivants or not ennemi_vivants:
             self.complete = True
-        
+
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
@@ -405,7 +409,7 @@ class Combat(Action):
         progress = max(0, min(1, progress))  # Limiter entre 0 et 1
 
         if progress == 0 or window["processed"]:
-            return;
+            return
 
         # Périmètre total du carré (4 côtés de 50 pixels)
         indicator_pos = progress * (4 * 50)
@@ -456,7 +460,7 @@ class Combat(Action):
             )
 
     def draw_menu(self):
-        
+
         perso_tour = self.get_perso_tour()
 
         pygame.draw.rect(
@@ -507,7 +511,6 @@ class Combat(Action):
         )
 
         # pa
-        max_pa = 8
         text_render_centered_left(
             self.jeu.ui_surface,
             f"PA : {perso_tour['pa']}/{max_pa}",
@@ -588,7 +591,6 @@ class Combat(Action):
         elif self.menu_actuel == "competences":
 
             competences = perso_tour["competences"]
-            print(competences)
             self.draw_selection([comp["nom"] for comp in competences])
 
         elif self.menu_actuel == "cible_ennemi":
@@ -612,11 +614,13 @@ class Combat(Action):
             perso_obj = self.jeu.equipe.get_personnage(perso["nom"])
             if perso_obj:
                 perso_obj.draw()
+
         for i, ennemi in enumerate(self.ennemis):
-            ratio_vie = ennemi["vie"]/ennemi["vie_depart"]
-            pygame.draw.line(self.jeu.ui_surface, (0, 0, 0), (10, i*25+10), (990, i*25+10), width=6)
-            pygame.draw.line(self.jeu.ui_surface, (255, 0, 0), (10, i*25+10), (990*ratio_vie, i*25+10), width=6)
-            
+            ratio_vie = ennemi["vie"] / ennemi["vie_depart"]
+            pygame.draw.line(self.jeu.ui_surface, (0, 0, 0), (10, i * 25 + 10), (990, i * 25 + 10), width=6)
+            pygame.draw.line(self.jeu.ui_surface, (255, 0, 0), (10, i * 25 + 10), (990 * ratio_vie, i * 25 + 10),
+                             width=6)
+
         perso_tour = self.get_perso_tour()
         if perso_tour and perso_tour.get("attacking", False):
             attacker = self.jeu.equipe.get_personnage(perso_tour["nom"])

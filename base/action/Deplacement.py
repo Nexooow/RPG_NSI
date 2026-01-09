@@ -1,5 +1,6 @@
 import pygame
 
+from menu.competences import MenuCompetences
 from .Action import Action
 
 from menu.carte import Carte
@@ -33,6 +34,8 @@ class Deplacement(Action):
                         self.jeu.ouvrir_menu(Inventaire(self.jeu))
                     elif self.option_choisie == 3:
                         self.jeu.ouvrir_menu(Carte(self.jeu))
+                    elif self.option_choisie == 4:
+                        self.jeu.ouvrir_menu(MenuCompetences(self.jeu))
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
                 self.option_choisie = (self.option_choisie + 1) % len(self.options)
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
@@ -142,6 +145,6 @@ class Deplacement(Action):
             "Continuer le trajet",
             "Interrompre le trajet",
             "Ouvrir l'inventaire",
-            # "Gérer votre équipe",
-            "Ouvrir la carte"
+            "Ouvrir la carte",
+            "Gérer les compétences"
         ]
