@@ -37,7 +37,7 @@
         }
     ],
     "interaction": [
-        [
+        
             {
                 "type":"dialogue",
                 "speaker":"Oz",
@@ -81,6 +81,6 @@
                 ]
                 
             }
-        ]
+        
     ]
 }
