@@ -27,6 +27,7 @@ class MenuCompetences(Menu):
         self.choice = None
         self.menu_actuel = "principal"
         self.selection = 0
+        self.prix_accessible={}
 
     def ouvrir(self):
         self.menu_actuel = "principal"
@@ -77,7 +78,10 @@ class MenuCompetences(Menu):
                         "points"] <= self.perso_selectionne.points_competences or (
                             competence in self.perso_selectionne.competences_achetees and not competence in self.perso_selectionne.competences_equipes))
             }
+            self.prix_accessible=prix_accessible
             self.options = list(prix_accessible.keys())
+            print(self.options)
+            print(self.selection)
             competence_selectionnee = list(prix_accessible.keys())[self.selection]
             self.display_text = self.perso_selectionne.competences[competence_selectionnee]
             # self.options=self.perso_selectionne.competences
@@ -119,10 +123,10 @@ class MenuCompetences(Menu):
         elif self.menu_actuel == self.perso_selectionne.nom:
             options = self.perso_selectionne.competences_equipes
             self.draw_selection(options)
-        elif self.menu_actuel == "competences":
+        elif self.menu_actuel == "competences possibles":
 
             competences = self.perso_selectionne.competences
-            self.draw_selection([comp["nom"] for comp in competences])
+            self.draw_selection([comp["nom"] for comp in competences.values()])
             if self.displaying:
                 text_render_centered(
                     self.jeu.ui_surface,

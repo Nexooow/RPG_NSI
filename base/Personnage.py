@@ -16,7 +16,7 @@ class Personnage:
         self.niveau = 1
         self.xp = 0
 
-        self.points_competences = 0
+        self.points_competences = 1
         self.points_attributs = 0
 
         self.attributs = {
@@ -209,7 +209,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 2
                         },
-                        "cible": "ennemi"
+                        "cible": "ennemi",
+                        "points":1
                     },
                     "tournee_generale": {
                         "nom": "Tournée Générale",
@@ -218,7 +219,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 3
                         },
-                        "cible": None
+                        "cible": None,
+                        "points":1
                     },
                     "flambee": {
                         "nom": "Flambée",
@@ -227,7 +229,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 6
                         },
-                        "cible": None
+                        "cible": None,
+                        "points":1
                     },
                     "cocktail_molotov": {
                         "nom": "Cocktail Molotov",
@@ -236,7 +239,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 4
                         },
-                        "cible": "ennemi"
+                        "cible": "ennemi",
+                        "points":1
                     },
                     "double_shot": {
                         "nom": "Double Shot",
@@ -246,7 +250,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 3
                         },
-                        "cible": "ennemi"
+                        "cible": "ennemi",
+                        "points":1
                     },
                     "happy_hour": {
                         "nom": "Happy Hour",
@@ -255,7 +260,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 6
                         },
-                        "cible": None
+                        "cible": None,
+                        "points":1
                     },
                     "gueule_de_bois": {
                         "nom": "Gueule de Bois",
@@ -265,7 +271,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 5
                         },
-                        "cible": "ennemi"
+                        "cible": "ennemi",
+                        "points":1
                     },
                     "dernier_verre": {
                         "nom": "Le Dernier Verre",
@@ -275,7 +282,8 @@ class Barman(Personnage):
                             "pa": 8,
                             "alcoolemie": 3
                         },
-                        "cible": "ennemi"
+                        "cible": "ennemi",
+                        "points":1
                     },
                     "shot_enflamme": {
                         "nom": "Shot Enflammé",
@@ -284,7 +292,8 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 4
                         },
-                        "cible": "ennemi"
+                        "cible": "ennemi",
+                        "points":1
                     },
                     "cuite_explosive": {
                         "nom": "Cuite Explosive",
@@ -294,6 +303,7 @@ class Barman(Personnage):
                         "cost": {
                             "pa": 7
                         },
+                        "points":1
                     }
                 }
             },
@@ -310,7 +320,7 @@ class Barman(Personnage):
             {0: [0], 1: [2]},
             data
         )
-
+        self.competences_achetees=["double_shot","cocktail_molotov"]
         self.competences_equipes = ["double_shot", "cocktail_molotov"]
 
     def utiliser_competence(self, competence_id, target=None):
@@ -454,6 +464,7 @@ class Vous(Personnage):
             # 0:idle, 1:running, 2:jumping, 3:slash from downwards, 4:slash from upwards, 5:getting hit,6:dying
             data
         )
+        self.competences_achetees=[]
         self.competences_equipes = ["onde_de_choc"]
 
     def utiliser_competence(self, competence, target=None):
