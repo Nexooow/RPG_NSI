@@ -2,7 +2,7 @@ import json
 import pygame
 import typing
 
-from base.Personnage import Barman
+from base.Personnage import Vous, Barman, Fachan
 from base.action import Action, Deplacement, AjoutTemps, SelectionAction
 from base.Loader import Loader
 from base.Equipe import Equipe
@@ -91,6 +91,7 @@ class Jeu:
         else:
             # self.equipe.ajouter_personnage(Vous(self.equipe))
             self.equipe.ajouter_personnage(Barman(self.equipe))
+            # self.equipe.ajouter_personnage(Fachan(self.equipe))
         # self.executer_sequence("test_combat")
 
     def restaurer(self, save_json):

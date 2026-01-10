@@ -21,8 +21,6 @@ class MenuCompetences(Menu):
     def __init__(self, jeu):
         super().__init__(jeu)
         self.options = []
-        self.overlay = pygame.Surface((1000, 700), pygame.SRCALPHA)
-        self.overlay.fill((0, 0, 0, 128))
         self.perso_selectionne = None
         self.displaying = False
         self.description_text = ""
@@ -45,6 +43,7 @@ class MenuCompetences(Menu):
                         self.selection = (self.selection + 1) % len(self.options)
                     elif event.key == pygame.K_UP:
                         self.selection = (self.selection - 1) % len(self.options)
+        self.update_selection(events)
 
     def update_selection(self, events):
         if self.menu_actuel == "principal":
@@ -54,6 +53,8 @@ class MenuCompetences(Menu):
                     if event.key == pygame.K_SPACE:
                         self.perso_selectionne = self.jeu.equipe.personnages[self.selection]
                         self.changer_menu(self.perso_selectionne.nom)
+                    elif event.key == pygame.K_ESCAPE:
+                        self.fermer()
 
 
         elif self.menu_actuel == self.perso_selectionne.nom:
@@ -64,8 +65,8 @@ class MenuCompetences(Menu):
                         self.choice = self.selection
                         self.changer_menu("competences possibles")
                     elif event.key == pygame.K_ESCAPE:
-
                         self.changer_menu("principal")
+
         elif self.menu_actuel == "competences possibles":
             # prix_accessible permet de recuperer un dico des competences achetables avec le budget
 
@@ -112,12 +113,11 @@ class MenuCompetences(Menu):
             )
 
     def draw(self):
-        self.jeu.ui_surface.fill((0, 0, 0, 0))
         if self.menu_actuel == "principal":
             options = [perso.nom for perso in self.jeu.equipe.personnages]
             self.draw_selection(options)
         elif self.menu_actuel == self.perso_selectionne.nom:
-            options = self.perso_selectionne.competences_equipees
+            options = self.perso_selectionne.competences_equipes
             self.draw_selection(options)
         elif self.menu_actuel == "competences":
 
