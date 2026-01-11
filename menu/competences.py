@@ -1,6 +1,6 @@
 import pygame
 import random
-from lib.render import text_render_centered, text_render_centered_left,render_text_wrapped
+from lib.render import text_render_centered, text_render_centered_left, render_text_wrapped
 from menu.Menu import Menu
 from lib.file import File
 import Jeu
@@ -21,6 +21,8 @@ DESCRIPTION_RECT = pygame.Rect(
     menu_width - 40,
     total_height
 )
+
+
 class MenuCompetences(Menu):
 
     def __init__(self, jeu):
@@ -81,12 +83,13 @@ class MenuCompetences(Menu):
             prix_accessible = {
                 competence: self.perso_selectionne.competences[competence]
                 for competence in self.perso_selectionne.competences.keys()
-                if competence not in self.perso_selectionne.competences_equipes and (self.perso_selectionne.competences[competence][
-                        "points"] <= self.perso_selectionne.points_competences or (
-                            competence in self.perso_selectionne.competences_achetees and not competence in self.perso_selectionne.competences_equipes))
+                if competence not in self.perso_selectionne.competences_equipes and (
+                            self.perso_selectionne.competences[competence][
+                                "points"] <= self.perso_selectionne.points_competences or (
+                                    competence in self.perso_selectionne.competences_debloques and not competence in self.perso_selectionne.competences_equipes))
             }
             self.options = list(prix_accessible.keys())
-            
+
             print(self.options)
             print(self.selection)
             if not self.options:
@@ -94,7 +97,7 @@ class MenuCompetences(Menu):
                 return
             competence_selectionnee = list(prix_accessible.keys())[self.selection]
             self.description_text = self.perso_selectionne.competences[competence_selectionnee]
-            self.displaying=True
+            self.displaying = True
             # self.options=self.perso_selectionne.competences
             for event in events:
                 if event.type == pygame.KEYDOWN:
@@ -105,8 +108,8 @@ class MenuCompetences(Menu):
                         else:
 
                             self.perso_selectionne.competences_equipes[self.choice] = competence_selectionnee
-                        self.perso_selectionne.competences_achetees.append(competence_selectionnee)
-                        self.perso_selectionne.points_competences-=1
+                        self.perso_selectionne.competences_debloques.append(competence_selectionnee)
+                        self.perso_selectionne.points_competences -= 1
                         self.changer_menu(self.perso_selectionne.nom)
                     elif event.key == pygame.K_ESCAPE:
                         if self.displaying:
@@ -158,4 +161,3 @@ class MenuCompetences(Menu):
                     font_name="regular",
                     rect=DESCRIPTION_RECT
                 )
-

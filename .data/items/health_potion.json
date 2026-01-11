@@ -3,6 +3,11 @@
     "nom": "health potion",
     "description": "A potion that restores health.",
     "type": "consommable",
-    "effets": [],
+    "effets": {
+        "heal": [
+            50,
+            0
+        ]
+    },
     "valeur": 15
 }

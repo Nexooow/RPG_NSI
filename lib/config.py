@@ -1,3 +1,5 @@
+import pygame
+
 sommets = ["Auberge", "Mountain", "Ceilidh", "Dawn of the world", "Elder Tree"]
 aretes = [
     ("Auberge", "Mountain", 45),
@@ -28,9 +30,9 @@ musiques_regions = {
 }
 
 fonds_regions = {
-    "Auberge": "",
-    "Mountain": "",
-    "Ceilidh": "",
-    "Dawn of the world": "",
-    "Elder Tree": "",
+    "Auberge": pygame.image.load("./assets/maps/auberge_bg.jpg"),
+    "Mountain": pygame.image.load("./assets/maps/mountain.jpg"),
+    "Ceilidh": pygame.image.load("./assets/maps/ceilidh.jpg"),
+    "Dawn of the world": pygame.image.load("./assets/maps/Dawn_of_the_world_bg.webp"),
+    "Elder Tree": pygame.image.load("./assets/maps/Elden_Tree_bg.webp"),
 }

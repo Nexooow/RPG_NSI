@@ -3,6 +3,11 @@
     "nom": "strength potion",
     "description": "A potion that increases strength.",
     "type": "consommable",
-    "effets": [],
+    "effets": {
+        "strength": [
+            1,
+            3
+        ]
+    },
     "valeur": 25
 }
