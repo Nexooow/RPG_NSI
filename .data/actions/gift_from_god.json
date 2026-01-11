@@ -2,11 +2,7 @@
     "id": "gift_from_god",
     "type": "event-positif",
     "run": [
-        {
-            "type": "condition",
-            "code": "jeu.equipe.inventaire['finger']==2",
-            "actions": {
-                "result == True": [
+        
                     {
                         "type": "dialogue",
                         "lines": [
@@ -71,8 +67,6 @@
                             }
                         ]
                     }
-                ]
-            }
-        }
+                
     ]
 }
