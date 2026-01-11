@@ -33,5 +33,5 @@ actions_par_type = {
     "add_perso":AddPerso,
     "street-fighter": StreetFighter,
     "radahn": Radahn,
-    "retire-item":RetireItems
+    "retire_item":RetireItems
 }
