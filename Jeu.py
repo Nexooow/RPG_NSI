@@ -90,8 +90,6 @@ class Jeu:
             self.restaurer(save_json)
         else:
             self.equipe.ajouter_personnage(Vous(self.equipe))
-            self.equipe.ajouter_personnage(Barman(self.equipe))
-            self.equipe.ajouter_personnage(Fachan(self.equipe))
         # self.executer_sequence("test_combat")
 
     def restaurer(self, save_json):
