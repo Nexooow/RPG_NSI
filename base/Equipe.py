@@ -28,7 +28,8 @@ class Equipe:
         return personnage is not None
 
     def ajouter_personnage(self, personnage):
-        self.personnages.append(personnage)
+        if not self.personnage_debloque(personnage.nom):
+            self.personnages.append(personnage)
 
     def equiper_personnage(self, nom, item_id):
         if item_id in self.inventaire:
