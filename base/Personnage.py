@@ -211,225 +211,6 @@ class Personnage:
         self.has_hit = True
 
 
-class Barman(Personnage):
-    """
-    Classe représentant le personnage Barman, avec des compétences spécifiques.
-    """
-
-    def __init__(self, equipe, data=None):
-        super().__init__(
-            equipe,
-            {
-                "nom": "Barman",
-                "competences": {
-                    "flameche": {
-                        "nom": "Flameche",
-                        "description": "Lance une petite flamme sur un ennemi, infligeant des dégâts de feu légers. "
-                                       "Inflige une brulure par niveau d'alcoolémie.",
-                        "cost": {
-                            "pa": 2
-                        },
-                        "cible": "ennemi",
-                        "points": 1
-                    },
-                    "tournee_generale": {
-                        "nom": "Tournée Générale",
-                        "description": "Applique Alcoolémie I à toutes les cibles (alliés et ennemis). Les alliés gagnent "
-                                       "+10% de dégâts.",
-                        "cost": {
-                            "pa": 3
-                        },
-                        "cible": None,
-                        "points": 1
-                    },
-                    "flambee": {
-                        "nom": "Flambée",
-                        "description": "Applique de légères brûlures à tous les ennemis. Les brûlures sont doublées"
-                                       "par niveau d'alcoolémie de chaque cible. Consomme l'alcoolémie des ennemis.",
-                        "cost": {
-                            "pa": 6
-                        },
-                        "cible": None,
-                        "points": 1
-                    },
-                    "cocktail_molotov": {
-                        "nom": "Cocktail Molotov",
-                        "description": "Lance un cocktail enflammé sur un ennemi. Dégâts +15% par niveau d'alcoolémie "
-                                       "du lanceur. Applique 3 brulures.",
-                        "cost": {
-                            "pa": 4
-                        },
-                        "cible": "ennemi",
-                        "points": 1
-                    },
-                    "double_shot": {
-                        "nom": "Double Shot",
-                        "description": "Frappe un ennemi deux fois rapidement. Applique Alcoolémie I à la cible et augmente "
-                                       "l'alcoolémie du lanceur de 1. Si la cible a déjà de l'alcoolémie, "
-                                       "applique Étourdissement.",
-                        "cost": {
-                            "pa": 3
-                        },
-                        "cible": "ennemi",
-                        "points": 1
-                    },
-                    "happy_hour": {
-                        "nom": "Happy Hour",
-                        "description": "Réduit le coût en PA de toutes les compétences alliées de 1 pour 3 tours. Applique "
-                                       "Alcoolémie I à tous les alliés.",
-                        "cost": {
-                            "pa": 6
-                        },
-                        "cible": None,
-                        "points": 1
-                    },
-                    "gueule_de_bois": {
-                        "nom": "Gueule de Bois",
-                        "description": "Inflige des dégâts physiques massifs basés sur le niveau d'alcoolémie de la cible ("
-                                       "x2.5 par niveau). Réinitialise son alcoolémie à 0. Met la santé du lanceur à 1.",
-                        "cost": {
-                            "pa": 8
-                        },
-                        "cible": "ennemi",
-                        "points": 1
-                    },
-                    "shot_enflamme": {
-                        "nom": "Shot Enflammé",
-                        "description": "Enflamme un ennemi et lui applique Alcoolémie II. Si la cible a "
-                                       "déjà de l'alcoolémie, applique 5 brulures.",
-                        "cost": {
-                            "pa": 4
-                        },
-                        "cible": "ennemi",
-                        "points": 1
-                    },
-                    "cuite_explosive": {
-                        "nom": "Cuite Explosive",
-                        "description": "Convertit chaque niveau d'alcoolémie du lanceur en dégâts de zone explosifs "
-                                       "sur tous les ennemis. Applique 5 brulures par niveau d'alcoolémie "
-                                       "consommé. Réinitialise l'alcoolémie.",
-                        "cost": {
-                            "pa": 8
-                        },
-                        "points": 1
-                    }
-                }
-            },
-            50,
-            300,
-            [100, 0.2, [0, 0]],
-            # Respectivement : la taille du perso, le scaling par rapport à l'image de base (500px de haut pour le barman), et l'offset à modifier si y a des petits problèmes au niveau de la diff d'affichage/hitbox
-            [
-                pygame.image.load("./assets/sprites/Barman_static.png"),
-                pygame.image.load("./assets/sprites/Barman_throw_cocktail.png")
-            ],
-            [1, 3],
-            {0: [0], 1: [2]},
-            data
-        )
-        self.competences_debloques = ["double_shot", "cocktail_molotov"]
-        self.competences_equipes = ["double_shot", "cocktail_molotov"]
-
-    def utiliser_competence(self, competence_id, attaquant, target=None):
-        """Utilise une compétence du Barman."""
-        if competence_id == "flameche":
-            self.start_attack(action=1, a_distance=True, target=target)
-            add_effets(
-                target,
-                {
-                    "brulure": [1 + target["effets"].get("alcoolemie", [0])[0], 3]
-                }
-            )
-        elif competence_id == "tournee_generale":
-            self.start_attack(action=0, a_distance=True, target=target)
-            assert isinstance(target, list)
-            for cible in target[0] + target[1]:
-                add_effets(
-                    cible,
-                    {
-                        "alcoolemie": [1, 3]
-                    }
-                )
-        elif competence_id == "flambee":
-            self.start_attack(action=0, a_distance=True, target=target)
-            assert isinstance(target, list)
-            for cible in target[1]:
-                add_effets(
-                    cible,
-                    {
-                        "brulure": [1 * (2 * cible["effets"].get("alcoolemie", [0])), 3]
-                    }
-                )
-                if "alcoolemie" in cible["effets"]:
-                    del cible["effets"]["alcoolemie"]
-        elif competence_id == "cocktail_molotov":
-            print("Utilisation de Cocktail Molotov")
-            self.start_attack(action=1, a_distance=True, target=target)
-            degats = calcul_degats(attaquant, target)
-            target["vie"] -= degats * (1 + 0.15 * attaquant["effets"].get("alcoolemie", [0])[0])
-            add_effets(
-                target,
-                {
-                    "brulure": [3, 3]
-                }
-            )
-        elif competence_id == "double_shot":
-            self.start_attack(action=1, a_distance=True, target=target)
-            if "alcoolemie" in target["effets"]:
-                add_effets(
-                    target,
-                    {
-                        "etourdissement": [1, 1]
-                    }
-                )
-            add_effets(
-                target,
-                {
-                    "alcoolemie": [1, 3]
-                }
-            )
-            add_effets(attaquant, {"alcoolemie": [1, 3]})
-            degats = calcul_degats(attaquant, target)
-            target["vie"] -= degats
-        elif competence_id == "happy_hour":
-            self.start_attack(action=0, a_distance=True, target=target)
-            assert isinstance(target, list)
-            for cible in target[0]:
-                add_effets(
-                    cible,
-                    {
-                        "reduction_pa": [1, 3],
-                        "alcoolemie": [1, 3]
-                    }
-                )
-        elif competence_id == "gueule_de_bois":
-            self.start_attack(action=1, a_distance=True, target=target)
-            degats = calcul_degats(attaquant, target) * 3
-            target["vie"] -= degats * (2.5 * target["effets"].get("alcoolemie", [0])[0])
-            attaquant["attributs"]["vie"] = 1
-        elif competence_id == "shot_enflamme":
-            self.start_attack(action=1, a_distance=True, target=target)
-            add_effets(
-                target,
-                {
-                    "alcoolemie": [2, 3],
-                    "brulure": [5 if "alcoolemie" in target["effets"] else 1, 3]
-                }
-            )
-        elif competence_id == "cuite_explosive":
-            assert isinstance(target, list)
-            niveau_alcoolemie = attaquant["effets"].get("alcoolemie", [0])[0]
-            for cible in target[1]:
-                add_effets(
-                    cible,
-                    {
-                        "brulure": [5 * niveau_alcoolemie, 3]
-                    }
-                )
-            if "alcoolemie" in attaquant["effets"]:
-                del attaquant["effets"]["alcoolemie"]
-
-
 class Vous(Personnage):
     """
     Classe représentant le joueur principal.
@@ -548,7 +329,7 @@ class Vous(Personnage):
                 }
             },
             50,
-            150,
+            50,
             [100, 0.6, [0, 0]],
             [
                 pygame.image.load("./assets/sprites/Idle.png"),
@@ -571,19 +352,19 @@ class Vous(Personnage):
         """Utilise une compétence du joueur."""
         if competence == "coup_de_poing":
             self.start_attack(action=3, a_distance=False, target=target)
-            degats = calcul_degats(self, target)
+            degats = calcul_degats(attaquant, target)
             target["vie"] -= degats
-            attaquant["attributs"]["elan"] += 1
+            add_effets(attaquant, {"elan": [1, -1]})
             if "marque" in target.get("effets", {}):
                 add_effets(target, {"marque": [1, 3]})
         elif competence == "marque":
             self.start_attack(action=3, a_distance=False, target=target)
-            attaquant["attributs"]["elan"] += 1
+            add_effets(attaquant, {"elan": [1, 2]})
             add_effets(target, {"marque": [1, 3]})
         elif competence == "charge_devastatrice":
             self.start_attack(action=4, a_distance=False, target=target)
             self.attributs["vie"] = max(int(self.attributs["vie_max"] * 0.3), 1)
-            degats = calcul_degats(self, target) * (1 + 0.15 * self.attributs.get("elan", 0))
+            degats = calcul_degats(attaquant, target) * (1 + 0.15 * attaquant["effets"].get("elan", [0])[0])
             target["vie"] -= degats
             if self.attributs.get("elan", 0) >= 3:
                 add_effets(target, {"etourdissement": [1, 1]})
@@ -593,34 +374,49 @@ class Vous(Personnage):
             add_effets(target, {"vulnerabilite": [1, 2]})
             if "marque" in target.get("effets", {}) or "etourdissement" in target.get("effets", {}):
                 add_effets(target, {"vulnerabilite": [2, 2]})
-            self.attributs["elan"] += 2
+            add_effets({
+                attaquant,
+                {
+                    "elan": [2, -1]
+                }
+            })
         elif competence == "riposte":
             self.start_attack(action=5, a_distance=False, target=target)
-            add_effets(self, {"riposte": [1, 2]})
+            add_effets(attaquant, {"riposte": [1, 2]})
         elif competence == "enchainement":
             self.start_attack(action=3, a_distance=False, target=target)
-            degats = calcul_degats(self, target)
+            degats = calcul_degats(attaquant, target)
             for i in range(3):
                 target["vie"] -= degats * (1 + 0.2 * i)
             if "marque" in target.get("effets", {}):
                 add_effets(target, {"saignement": [2, 3]})
         elif competence == "frappe_tactique":
             self.start_attack(action=3, a_distance=False, target=target)
-            degats = calcul_degats(self, target) * 1.5
+            degats = calcul_degats(attaquant, target) * 1.5
             if "vulnerabilite" in target.get("effets", {}):
                 degats *= 1.5
             target["vie"] -= degats
-            self.attributs["elan"] += 1
+            add_effets({
+                attaquant,
+                {
+                    "elan": [1, -1]
+                }
+            })
         elif competence == "furie_guerriere":
             self.start_attack(action=1, a_distance=False, target=target)
             add_effets(self, {"bonus_degats": [0.3, 3], "bonus_vitesse": [0.2, 3]})
-            self.attributs["elan"] += 2
+            add_effets({
+                attaquant,
+                {
+                    "elan": [2, -1]
+                }
+            })
         elif competence == "execution":
             self.start_attack(action=4, a_distance=False, target=target)
             if self.attributs.get("elan", 0) >= 5:
                 degats = calcul_degats(self, target) * (3 if target["vie"] < target["vie_max"] * 0.3 else 1)
                 target["vie"] -= degats
-                self.attributs["elan"] -= 5
+                attaquant["effets"]["elan"][0] -= 5
         elif competence == "onde_de_choc":
             self.start_attack(action=4, a_distance=False, target=target)
             if self.attributs.get("elan", 0) >= 2:
@@ -629,6 +425,225 @@ class Vous(Personnage):
                     ennemi["vie"] -= degats
                     add_effets(ennemi, {"marque": [1, 3]})
                 self.attributs["elan"] = 0
+
+
+class Barman(Personnage):
+    """
+    Classe représentant le personnage Barman, avec des compétences spécifiques.
+    """
+
+    def __init__(self, equipe, data=None):
+        super().__init__(
+            equipe,
+            {
+                "nom": "Barman",
+                "competences": {
+                    "flameche": {
+                        "nom": "Flameche",
+                        "description": "Lance une petite flamme sur un ennemi, infligeant des dégâts de feu légers. "
+                                       "Inflige une brulure par niveau d'alcoolémie.",
+                        "cost": {
+                            "pa": 2
+                        },
+                        "cible": "ennemi",
+                        "points": 1
+                    },
+                    "tournee_generale": {
+                        "nom": "Tournée Générale",
+                        "description": "Applique Alcoolémie I à toutes les cibles (alliés et ennemis). Les alliés gagnent "
+                                       "+10% de dégâts.",
+                        "cost": {
+                            "pa": 3
+                        },
+                        "cible": None,
+                        "points": 1
+                    },
+                    "flambee": {
+                        "nom": "Flambée",
+                        "description": "Applique de légères brûlures à tous les ennemis. Les brûlures sont doublées"
+                                       "par niveau d'alcoolémie de chaque cible. Consomme l'alcoolémie des ennemis.",
+                        "cost": {
+                            "pa": 6
+                        },
+                        "cible": None,
+                        "points": 1
+                    },
+                    "cocktail_molotov": {
+                        "nom": "Cocktail Molotov",
+                        "description": "Lance un cocktail enflammé sur un ennemi. Dégâts +15% par niveau d'alcoolémie "
+                                       "du lanceur. Applique 3 brulures.",
+                        "cost": {
+                            "pa": 4
+                        },
+                        "cible": "ennemi",
+                        "points": 1
+                    },
+                    "double_shot": {
+                        "nom": "Double Shot",
+                        "description": "Frappe un ennemi deux fois rapidement. Applique Alcoolémie I à la cible et augmente "
+                                       "l'alcoolémie du lanceur de 1. Si la cible a déjà de l'alcoolémie, "
+                                       "applique Étourdissement.",
+                        "cost": {
+                            "pa": 3
+                        },
+                        "cible": "ennemi",
+                        "points": 1
+                    },
+                    "happy_hour": {
+                        "nom": "Happy Hour",
+                        "description": "Réduit le coût en PA de toutes les compétences alliées de 1 pour 3 tours. Applique "
+                                       "Alcoolémie I à tous les alliés.",
+                        "cost": {
+                            "pa": 6
+                        },
+                        "cible": None,
+                        "points": 1
+                    },
+                    "gueule_de_bois": {
+                        "nom": "Gueule de Bois",
+                        "description": "Inflige des dégâts physiques massifs basés sur le niveau d'alcoolémie de la cible ("
+                                       "x2.5 par niveau). Réinitialise son alcoolémie à 0. Met la santé du lanceur à 1.",
+                        "cost": {
+                            "pa": 8
+                        },
+                        "cible": "ennemi",
+                        "points": 1
+                    },
+                    "shot_enflamme": {
+                        "nom": "Shot Enflammé",
+                        "description": "Enflamme un ennemi et lui applique Alcoolémie II. Si la cible a "
+                                       "déjà de l'alcoolémie, applique 5 brulures.",
+                        "cost": {
+                            "pa": 4
+                        },
+                        "cible": "ennemi",
+                        "points": 1
+                    },
+                    "cuite_explosive": {
+                        "nom": "Cuite Explosive",
+                        "description": "Convertit chaque niveau d'alcoolémie du lanceur en dégâts de zone explosifs "
+                                       "sur tous les ennemis. Applique 5 brulures par niveau d'alcoolémie "
+                                       "consommé. Réinitialise l'alcoolémie.",
+                        "cost": {
+                            "pa": 8
+                        },
+                        "points": 1
+                    }
+                }
+            },
+            50,
+            200,
+            [100, 0.2, [0, 0]],
+            # Respectivement : la taille du perso, le scaling par rapport à l'image de base (500px de haut pour le barman), et l'offset à modifier si y a des petits problèmes au niveau de la diff d'affichage/hitbox
+            [
+                pygame.image.load("./assets/sprites/Barman_static.png"),
+                pygame.image.load("./assets/sprites/Barman_throw_cocktail.png")
+            ],
+            [1, 3],
+            {0: [0], 1: [2]},
+            data
+        )
+        self.competences_debloques = ["double_shot", "cocktail_molotov"]
+        self.competences_equipes = ["double_shot", "cocktail_molotov"]
+
+    def utiliser_competence(self, competence_id, attaquant, target=None):
+        """Utilise une compétence du Barman."""
+        if competence_id == "flameche":
+            self.start_attack(action=1, a_distance=True, target=target)
+            add_effets(
+                target,
+                {
+                    "brulure": [1 + target["effets"].get("alcoolemie", [0])[0], 3]
+                }
+            )
+        elif competence_id == "tournee_generale":
+            self.start_attack(action=0, a_distance=True, target=target)
+            assert isinstance(target, list)
+            for cible in target[0] + target[1]:
+                add_effets(
+                    cible,
+                    {
+                        "alcoolemie": [1, 3]
+                    }
+                )
+        elif competence_id == "flambee":
+            self.start_attack(action=0, a_distance=True, target=target)
+            assert isinstance(target, list)
+            for cible in target[1]:
+                add_effets(
+                    cible,
+                    {
+                        "brulure": [1 * (2 * cible["effets"].get("alcoolemie", [0])), 3]
+                    }
+                )
+                if "alcoolemie" in cible["effets"]:
+                    del cible["effets"]["alcoolemie"]
+        elif competence_id == "cocktail_molotov":
+            print("Utilisation de Cocktail Molotov")
+            self.start_attack(action=1, a_distance=True, target=target)
+            degats = calcul_degats(attaquant, target)
+            target["vie"] -= degats * (1 + 0.15 * attaquant["effets"].get("alcoolemie", [0])[0])
+            add_effets(
+                target,
+                {
+                    "brulure": [3, 3]
+                }
+            )
+        elif competence_id == "double_shot":
+            self.start_attack(action=1, a_distance=True, target=target)
+            if "alcoolemie" in target["effets"]:
+                add_effets(
+                    target,
+                    {
+                        "etourdissement": [1, 1]
+                    }
+                )
+            add_effets(
+                target,
+                {
+                    "alcoolemie": [1, 3]
+                }
+            )
+            add_effets(attaquant, {"alcoolemie": [1, 3]})
+            degats = calcul_degats(attaquant, target)
+            target["vie"] -= degats
+        elif competence_id == "happy_hour":
+            self.start_attack(action=0, a_distance=True, target=target)
+            assert isinstance(target, list)
+            for cible in target[0]:
+                add_effets(
+                    cible,
+                    {
+                        "reduction_pa": [1, 3],
+                        "alcoolemie": [1, 3]
+                    }
+                )
+        elif competence_id == "gueule_de_bois":
+            self.start_attack(action=1, a_distance=True, target=target)
+            degats = calcul_degats(attaquant, target) * 3
+            target["vie"] -= degats * (2.5 * target["effets"].get("alcoolemie", [0])[0])
+            attaquant["attributs"]["vie"] = 1
+        elif competence_id == "shot_enflamme":
+            self.start_attack(action=1, a_distance=True, target=target)
+            add_effets(
+                target,
+                {
+                    "alcoolemie": [2, 3],
+                    "brulure": [5 if "alcoolemie" in target["effets"] else 1, 3]
+                }
+            )
+        elif competence_id == "cuite_explosive":
+            assert isinstance(target, list)
+            niveau_alcoolemie = attaquant["effets"].get("alcoolemie", [0])[0]
+            for cible in target[1]:
+                add_effets(
+                    cible,
+                    {
+                        "brulure": [5 * niveau_alcoolemie, 3]
+                    }
+                )
+            if "alcoolemie" in attaquant["effets"]:
+                del attaquant["effets"]["alcoolemie"]
 
 
 class Fachan(Personnage):
@@ -713,53 +728,55 @@ class Fachan(Personnage):
                 }
             },
             50,
-            450,
+            350,
             [100, 0.25, [0, 0]],
             [
                 pygame.transform.flip(
                     pygame.transform.scale(
-                        pygame.image.load('./assets/sprites/fachan_static_steel.png'),
+                        pygame.image.load('./assets/sprites/fachan_static_steel-removebg-preview.png'),
                         (int((408 / 1024) * 1536), 408)
                     ),
-                    False,
-                    True
+                    True,
+                    False
                 ),
                 pygame.transform.flip(
                     pygame.transform.scale(
-                        pygame.image.load("./assets/sprites/fachan_static.png"),
+                        pygame.image.load("./assets/sprites/fachan_static-removebg-preview.png"),
                         (int((408 / 1024) * 1536), 408)
                     ),
-                    False,
-                    True
+                    True,
+                    False
                 ),
                 pygame.transform.flip(
-                    pygame.image.load("./assets/sprites/fachan_attacking.png"),
-                    False,
-                    True
+                    pygame.image.load("./assets/sprites/fachan-removebg-preview (2).png"),
+                    True,
+                    False
                 ),
                 pygame.transform.flip(
                     pygame.image.load("./assets/sprites/fachan_steelform_attacking.png"),
-                    False,
-                    True
+                    True,
+                    False
                 ),
                 pygame.transform.flip(
                     pygame.image.load("./assets/sprites/look_for_feet.png"),
-                    False,
-                    True
+                    True,
+                    False
                 ),
                 pygame.transform.flip(
                     pygame.transform.scale(
                         pygame.image.load("./assets/sprites/look_for_feet_steel.png"),
                         (int((408 / 100) * 97), 100)
                     ),
-                    False,
-                    True
+                    True,
+                    False
                 ),
             ],
             [1, 1, 3, 3, 1, 1],
             {0: [0], 1: [0], 2: [2], 3: [2], 4: [0], 5: [0]},
             data)
         self.steel_form = False
+        self.competences_debloques = ["regard_jugeur", "caber"]
+        self.competences_equipes = ["regard_jugeur", "caber"]
 
     def utiliser_competence(self, competence, attaquant, cibles=None):
         """Utilise une compétence de Fachan."""

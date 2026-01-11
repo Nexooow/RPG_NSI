@@ -47,23 +47,208 @@
                             }
                         ],
                         "actions": {
-                            "yes": [
+                            "sure": [
                                 {
                                     "type": "combat",
+                                    "musique": "clair_obscur_we_lost",
+                                    "fond": "background.webp",
                                     "ennemis": [
                                         {
                                             "type": "ennemi",
                                             "nom": "Simon",
-                                            "vie": 5000,
+                                            "vie": 1000,
                                             "attributs": {
-                                                "vitesse": 75
+                                                "vitesse": 100
                                             },
                                             "attaques": [
                                                 {
-                                                    "nom": "Poings",
+                                                    "nom": "Coup de Poings",
                                                     "actions": [
                                                         {
-                                                            
+                                                            "type": "parry",
+                                                            "w_start": 5,
+                                                            "w_end": 50,
+                                                            "damage": 50,
+                                                            "pos_x": 485,
+                                                            "pos_y": 345
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 55,
+                                                            "w_end": 103,
+                                                            "damage": 55,
+                                                            "pos_x": 615,
+                                                            "pos_y": 345
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 115,
+                                                            "w_end": 160,
+                                                            "damage": 65,
+                                                            "pos_x": 485,
+                                                            "pos_y": 345
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "nom": "Combo Court",
+                                                    "actions": [
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 1,
+                                                            "w_end": 46,
+                                                            "damage": 32,
+                                                            "pos_x": 475,
+                                                            "pos_y": 340
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 48,
+                                                            "w_end": 93,
+                                                            "damage": 34,
+                                                            "pos_x": 525,
+                                                            "pos_y": 340
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 98,
+                                                            "w_end": 143,
+                                                            "damage": 36,
+                                                            "pos_x": 475,
+                                                            "pos_y": 355
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 148,
+                                                            "w_end": 193,
+                                                            "damage": 38,
+                                                            "pos_x": 525,
+                                                            "pos_y": 355
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 200,
+                                                            "w_end": 245,
+                                                            "damage": 40,
+                                                            "pos_x": 475,
+                                                            "pos_y": 340
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 252,
+                                                            "w_end": 297,
+                                                            "damage": 42,
+                                                            "pos_x": 525,
+                                                            "pos_y": 340
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 305,
+                                                            "w_end": 350,
+                                                            "damage": 45,
+                                                            "pos_x": 475,
+                                                            "pos_y": 355
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 358,
+                                                            "w_end": 403,
+                                                            "damage": 50,
+                                                            "pos_x": 525,
+                                                            "pos_y": 355
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "nom": "Combo Long",
+                                                    "actions": [
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 1,
+                                                            "w_end": 46,
+                                                            "damage": 30,
+                                                            "pos_x": 470,
+                                                            "pos_y": 335
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 48,
+                                                            "w_end": 93,
+                                                            "damage": 32,
+                                                            "pos_x": 530,
+                                                            "pos_y": 335
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 98,
+                                                            "w_end": 143,
+                                                            "damage": 33,
+                                                            "pos_x": 470,
+                                                            "pos_y": 350
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 148,
+                                                            "w_end": 193,
+                                                            "damage": 35,
+                                                            "pos_x": 530,
+                                                            "pos_y": 350
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 200,
+                                                            "w_end": 245,
+                                                            "damage": 37,
+                                                            "pos_x": 470,
+                                                            "pos_y": 365
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 252,
+                                                            "w_end": 297,
+                                                            "damage": 38,
+                                                            "pos_x": 530,
+                                                            "pos_y": 365
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 305,
+                                                            "w_end": 350,
+                                                            "damage": 40,
+                                                            "pos_x": 470,
+                                                            "pos_y": 335
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 358,
+                                                            "w_end": 403,
+                                                            "damage": 42,
+                                                            "pos_x": 530,
+                                                            "pos_y": 335
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 412,
+                                                            "w_end": 457,
+                                                            "damage": 44,
+                                                            "pos_x": 470,
+                                                            "pos_y": 350
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 465,
+                                                            "w_end": 510,
+                                                            "damage": 46,
+                                                            "pos_x": 530,
+                                                            "pos_y": 350
+                                                        },
+                                                        {
+                                                            "type": "parry",
+                                                            "w_start": 520,
+                                                            "w_end": 565,
+                                                            "damage": 55,
+                                                            "pos_x": 500,
+                                                            "pos_y": 340
                                                         }
                                                     ]
                                                 }
@@ -71,7 +256,8 @@
                                         }
                                     ]
                                 }
-                            ]
+                            ],
+                            "cancel": []
                         }
                     }
                 ],

@@ -76,7 +76,7 @@ class Combat(Action):
         self.utilise_fond = self.fond is not None
 
         if self.utilise_fond:
-            self.fond = pygame.image.load(f"./assets/backgrounds/{self.fond}")
+            self.fond = pygame.image.load(f"./assets/maps/{self.fond}")
 
         self.tours = File()
         self.tour = None
@@ -98,6 +98,7 @@ class Combat(Action):
         super().executer()
         self.action = "selection"
         self.menu_actuel = "principal"
+        self.jeu.jouer_musique(self.musique, loop=True, volume=0.2)
 
         self.personnages = [instance_combat(personnage) for personnage in self.jeu.equipe.personnages]
         self.maj_tours()
@@ -160,7 +161,7 @@ class Combat(Action):
         skip_tour = False
 
         effets = perso["effets"]
-        print(effets)
+        effets_a_supprime = []
         for nom_effet, (niveau, duree) in effets.items():
             if nom_effet == "brulure":
                 perso["attributs"]["vie"] -= niveau
@@ -169,13 +170,16 @@ class Combat(Action):
                         niveau * 5 / 100)  # soigner 5% de la vie max par niveau de regeneration
             elif nom_effet == "etourdissement":
                 skip_tour = True
-                del effets["etourdissement"]
+                effets_a_supprime.append("etourdissement")
 
             if duree > 0:
                 effets[nom_effet][1] -= 1
 
             if effets[nom_effet][1] == 0:
-                del effets[nom_effet]
+                effets_a_supprime.append(nom_effet)
+
+        for nom_effet in effets_a_supprime:
+            del effets[nom_effet]
 
         if skip_tour or perso["attributs"].get("vie", 0) <= 0:
             self.prochain_tour()
@@ -498,7 +502,7 @@ class Combat(Action):
         pygame.draw.line(self.jeu.ui_surface, (245, 205, 0), (pos[0] - 25, pos[1] - 25), (pos[0] - 25, pos[1] + 25), 3)
 
         # Dessiner l'indicateur
-        pygame.draw.circle(self.jeu.ui_surface, (0, 0, 0), (int(indicator_x), int(indicator_y)),
+        pygame.draw.circle(self.jeu.ui_surface, (245, 205, 0), (int(indicator_x), int(indicator_y)),
                            3)
 
     def draw_selection(self, options):
@@ -660,6 +664,23 @@ class Combat(Action):
             ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["attributs"]["vie"] > 0]
             self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
 
+    def draw_health_bar(self, x, y, vie, vie_max, width=100, height=8):
+        """Dessine une barre de vie à la position donnée"""
+        ratio_vie = max(0, vie / vie_max) if vie_max > 0 else 0
+
+        # Fond noir
+        pygame.draw.rect(self.jeu.ui_surface, (0, 0, 0), (x - width // 2, y, width + 2, height + 2))
+
+        # Barre de vie (couleur dégradée selon la santé)
+        if ratio_vie > 0.5:
+            color = (0, 255, 0)  # Vert
+        elif ratio_vie > 0.25:
+            color = (255, 165, 0)  # Orange
+        else:
+            color = (255, 0, 0)  # Rouge
+
+        pygame.draw.rect(self.jeu.ui_surface, color, (x - width // 2 + 1, y + 1, width * ratio_vie, height))
+
     def draw_ui(self):
         # menu
         if self.action == "selection" and self.tour[0] == "personnage":
@@ -672,16 +693,34 @@ class Combat(Action):
     def draw(self):
 
         self.draw_ui()
+
+        # Dessiner les personnages et leurs barres de vie
         for perso in self.personnages:
             perso_obj = self.jeu.equipe.get_personnage(perso["nom"])
             if perso_obj:
                 perso_obj.draw()
+                # Dessiner la barre de vie sous le personnage
+                vie = perso["attributs"]["vie"]
+                vie_max = perso["attributs"]["vie_max"]
+                # Position sous le personnage
+                bar_x = perso_obj.rect.centerx
+                bar_y = perso_obj.rect.bottom + 5
+                self.draw_health_bar(bar_x, bar_y, vie, vie_max, width=80, height=6)
 
-        for i, ennemi in enumerate(self.ennemis):
-            ratio_vie = ennemi["attributs"]["vie"] / ennemi["vie_depart"]
-            pygame.draw.line(self.jeu.ui_surface, (0, 0, 0), (10, i * 25 + 10), (990, i * 25 + 10), width=6)
-            pygame.draw.line(self.jeu.ui_surface, (255, 0, 0), (10, i * 25 + 10), (990 * ratio_vie, i * 25 + 10),
-                             width=6)
+        # Dessiner les ennemis et leurs barres de vie
+        for ennemi in self.ennemis:
+            # Calculer la barre de vie de l'ennemi
+            vie = ennemi["attributs"]["vie"]
+            vie_depart = ennemi["vie_depart"]
+
+            # Chercher l'objet ennemi pour obtenir sa position
+            # Les ennemis sont généralement affichés en haut de l'écran
+            # On peut utiliser leur index pour positionner les barres
+            ennemi_index = self.ennemis.index(ennemi)
+            bar_x = 500 + ennemi_index * 200  # Position horizontale
+            bar_y = 50 + ennemi_index * 30  # Position verticale
+
+            self.draw_health_bar(bar_x, bar_y, vie, vie_depart, width=120, height=8)
 
         perso_tour = self.get_perso_tour()
         if perso_tour and perso_tour.get("attacking", False):

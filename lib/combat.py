@@ -4,8 +4,6 @@ Module de gestion des effets en combat.
 """
 import random
 
-from networkx.algorithms.flow.gomory_hu import default_flow_func
-
 
 def add_effets(cible, effets: dict):
     """
