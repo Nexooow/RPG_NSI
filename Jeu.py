@@ -7,7 +7,7 @@ from base.action import Action, Deplacement, AjoutTemps, SelectionAction
 from base.Loader import Loader
 from base.Equipe import Equipe
 
-from lib.config import sommets, aretes, positions_sommets, musiques_regions
+from lib.config import sommets, aretes, positions_sommets, musiques_regions, fonds_regions
 from lib.file import File
 from lib.graph import Graph
 from lib.render import text_render_centered
@@ -89,9 +89,9 @@ class Jeu:
         if save_json is not None:
             self.restaurer(save_json)
         else:
-            # self.equipe.ajouter_personnage(Vous(self.equipe))
+            self.equipe.ajouter_personnage(Vous(self.equipe))
             self.equipe.ajouter_personnage(Barman(self.equipe))
-            # self.equipe.ajouter_personnage(Fachan(self.equipe))
+            self.equipe.ajouter_personnage(Fachan(self.equipe))
         # self.executer_sequence("test_combat")
 
     def restaurer(self, save_json):
@@ -194,6 +194,7 @@ class Jeu:
             self.menu.draw()
         elif self.debute:
             self.fond.fill((255, 255, 255))
+            self.fond.blit(fonds_regions[self.region], (0, 0))
             if self.action_actuelle is not None:
                 if not self.action_actuelle.utilise_fond:
                     pass

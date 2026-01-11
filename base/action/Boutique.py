@@ -83,9 +83,7 @@ class Boutique(Action):
 
     def draw(self):
 
-        overlay = pygame.Surface((self.jeu.WIDTH, self.jeu.HEIGHT), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))
-        self.jeu.ui_surface.blit(overlay, (0, 0))
+        self.jeu.ui_surface.fill((0, 0, 0, 180))
 
         titre = "BOUTIQUE - ACHAT" if self.mode == "achat" else "BOUTIQUE - VENTE"
         text_render_centered(self.jeu.ui_surface, titre, "bold", color=(255, 255, 255),

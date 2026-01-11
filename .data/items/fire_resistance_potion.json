@@ -3,6 +3,11 @@
     "nom": "fire resistance potion",
     "description": "A potion that immunes to fire.",
     "type": "consommable",
-    "effets": [],
+    "effets": {
+        "fire_resistance": [
+            1,
+            3
+        ]
+    },
     "valeur": 15
 }

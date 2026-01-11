@@ -1,8 +1,11 @@
 import pygame
 import random
+
+from lib.combat import add_effets, calcul_degats
 from lib.render import text_render_centered_left
 from .Action import Action
 from lib.file import File
+from lib.sounds import son_selection
 
 parrysound = pygame.mixer.Sound("assets/sounds/parry.mp3")
 parrysound.set_volume(0.05)
@@ -26,7 +29,7 @@ def instance_combat(personnage):
     return {
         "type": "personnage",
         **personnage.__dict__,
-        "effets": [],  # cle: nom de l'effet, valeur : (niveau, durée)
+        "effets": {},  # cle: nom de l'effet, valeur : (niveau, durée)
         "pa": 3,
         "competences": [
             {**competence, "id": id_competence}
@@ -44,10 +47,11 @@ def transformer_ennemi(ennemi):
         "type": "ennemi",
         "vie_depart": ennemi["vie"],
         **ennemi,
-        "effets": []
+        "effets": {}
     }
     if "attributs" not in ennemi:
         instance["attributs"] = {}
+    instance["attributs"]["vie"] = instance["vie_depart"]
     return instance
 
 
@@ -72,7 +76,7 @@ class Combat(Action):
         self.utilise_fond = self.fond is not None
 
         if self.utilise_fond:
-            self.fond = pygame.image.load(f"./assets/backgrounds/{self.fond}")
+            self.fond = pygame.image.load(f"./assets/maps/{self.fond}")
 
         self.tours = File()
         self.tour = None
@@ -88,14 +92,13 @@ class Combat(Action):
         self.menu_actuel = "principal"
         self.selection = 0
 
-        self.action_en_cours = False
-
         self.message = None
 
     def executer(self):
         super().executer()
         self.action = "selection"
         self.menu_actuel = "principal"
+        self.jeu.jouer_musique(self.musique, loop=True, volume=0.2)
 
         self.personnages = [instance_combat(personnage) for personnage in self.jeu.equipe.personnages]
         self.maj_tours()
@@ -113,6 +116,9 @@ class Combat(Action):
             combatants) if combatants else 1
 
         for combatant in combatants:
+            if combatant["attributs"].get("vie", 0) <= 0:
+                continue
+
             vitesse = combatant["attributs"].get("vitesse", 0)
             # permettre au combatant de jouer 2 fois si la vitesse est 2 fois supérieur à la moyenne
             nombre_tours = min(
@@ -155,49 +161,35 @@ class Combat(Action):
         skip_tour = False
 
         effets = perso["effets"]
-        for nom_effet, effet in effets:
+        effets_a_supprime = []
+        for nom_effet, (niveau, duree) in effets.items():
             if nom_effet == "brulure":
-                perso["attributs"]["vie"] -= effet[0]
+                perso["attributs"]["vie"] -= niveau
             elif nom_effet == "regeneration":
                 perso["attributs"]["vie"] += perso["attributs"]["vie_max"] * (
-                        effet[0] * 5 / 100)  # soigner 5% de la vie max par niveau de regeneration
+                        niveau * 5 / 100)  # soigner 5% de la vie max par niveau de regeneration
             elif nom_effet == "etourdissement":
                 skip_tour = True
-                del effets["etourdissement"]
+                effets_a_supprime.append("etourdissement")
 
-            if effet[1] > 0:
+            if duree > 0:
                 effets[nom_effet][1] -= 1
 
             if effets[nom_effet][1] == 0:
-                del effets[nom_effet]
+                effets_a_supprime.append(nom_effet)
 
-        if skip_tour:
+        for nom_effet in effets_a_supprime:
+            del effets[nom_effet]
+
+        if skip_tour or perso["attributs"].get("vie", 0) <= 0:
             self.prochain_tour()
         else:
             self.action = "selection"
 
-    def calcul_degats(self, attaquant, cible):
-        arme = attaquant.get("arme")
-        if arme is None:
-            arme = {
-                "degats": 1,
-                "critique": 5
-            }
-        degats = arme.get("degats", 1) + attaquant["attributs"].get("force", 1)
-        crit = arme.get("critique", 5) + attaquant["attributs"].get("chance", 1) > random.randint(1, 100)
-        if crit:
-            degats *= 2
-
-        # marque
-        if "marque" in cible["effets"]:
-            degats *= 1.5
-            del cible["effets"]["marque"]
-
-        return degats
-
     def utiliser_competence(self, personnage, cibles=None):
         self.action = "attaque"
-        self.jeu.equipe.get_personnage(personnage.nom).utiliser_competence(self, self.competence_en_cours, cibles)
+        self.jeu.equipe.get_personnage(personnage.nom).utiliser_competence(self, self.competence_en_cours, personnage,
+                                                                           cibles)
 
     def changer_menu(self, menu):
         self.menu_actuel = menu
@@ -212,15 +204,36 @@ class Combat(Action):
             cible = random.choice(
                 [perso for perso in self.personnages if perso["attributs"]["vie"] > 0]
             )
-            self.attaques = [
-                {
+
+            # Créer les attaques avec positions
+            actions_avec_positions = []
+            parry_count = 0
+            for action in attaque["actions"]:
+                action_dict = {
                     **action,
                     "cible": self.personnages.index(cible) if "cible" not in action else None,
                     "focus": False,
                     "processed": False
                 }
-                for action in attaque["actions"]
-            ]
+
+                # Ajouter les positions x, y
+                if action.get("type") == "parry":
+                    # Utiliser la position prédéfinie si elle existe, sinon la calculer
+                    if "pos_x" not in action or "pos_y" not in action:
+                        action_dict["pos_x"] = 500 + (parry_count % 2) * 150 - 75
+                        action_dict["pos_y"] = 350 + (parry_count // 2) * 150 - 75
+                    else:
+                        action_dict["pos_x"] = action["pos_x"]
+                        action_dict["pos_y"] = action["pos_y"]
+                    parry_count += 1
+                else:
+                    # Positions par défaut pour les autres types d'attaques
+                    action_dict["pos_x"] = action.get("pos_x", 500)
+                    action_dict["pos_y"] = action.get("pos_y", 350)
+
+                actions_avec_positions.append(action_dict)
+
+            self.attaques = actions_avec_positions
             self.sub_frame_count = 0
             self.action = "attaque"
 
@@ -242,7 +255,7 @@ class Combat(Action):
                     if cible:
                         if "damage" in attaque:
                             cible["attributs"]["vie"] -= attaque["damage"]
-                    # TODO: appliquer l'attaque (dégâts, effets, etc...)
+                        add_effets(cible, attaque.get("effets", {}))
                     continue
 
                 if attaque["w_start"] <= self.sub_frame_count:
@@ -252,9 +265,18 @@ class Combat(Action):
                     for event in events:
                         if event.type == pygame.KEYDOWN and (event.key == pygame.K_e or event.key == pygame.K_SPACE):
                             if attaque.get("type") == "parry" and attaque["focus"] == True:
-                                parrysound.play()
-                                ajouter_pa(cible)
-                                attaque["processed"] = True
+                                # Vérifier si l'indicateur est dans la zone dorée
+                                if self.est_timing_parry(attaque):
+                                    # Parry réussi
+                                    parrysound.play()
+                                    ajouter_pa(cible)
+                                    attaque["processed"] = True
+                                else:
+                                    # Parry échoué
+                                    if "damage" in attaque:
+                                        cible["attributs"]["vie"] -= attaque["damage"]
+                                    add_effets(cible, attaque.get("effets", {}))
+                                    attaque["processed"] = True
 
             if all_processed:
                 self.prochain_tour()
@@ -283,7 +305,7 @@ class Combat(Action):
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         ennemi = self.ennemis[ennemis_vivants[self.selection]]
-                        ennemi["vie"] -= self.calcul_degats(perso_actuel, ennemi)
+                        ennemi["attributs"]["vie"] -= calcul_degats(perso_actuel, ennemi)
                         ajouter_pa(perso_actuel)
                         self.prochain_tour()
                     elif event.key == pygame.K_ESCAPE:
@@ -317,7 +339,7 @@ class Combat(Action):
                         cible_type = competence_selectionnee.get("cible")
                         self.competence_en_cours = competence_selectionnee
                         if cible_type is None:
-                            self.select_competence(competence_selectionnee)
+                            self.select_competence(competence_selectionnee["id"])
                         elif cible_type == "ennemi":
                             self.changer_menu("cible_ennemi")
                     elif event.key == pygame.K_ESCAPE:
@@ -329,10 +351,9 @@ class Combat(Action):
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-
                         target_dict = self.ennemis[ennemis_vivants[self.selection]]
-                        self.select_competence(self.competence_en_cours["id"], target_dict)
-
+                        competence_id = self.competence_en_cours["id"]
+                        self.select_competence(competence_id, target_dict)
                     elif event.key == pygame.K_ESCAPE:
                         self.changer_menu("competences")
 
@@ -342,21 +363,40 @@ class Combat(Action):
             if perso_obj:
                 perso_obj.update(
                     state=perso_obj.action,
-                    a_distance=perso.get("a_distance", False),
-                    target=perso_obj.target
+                    # a_distance=perso.get("a_distance", False),
+                    # target=perso_obj.target
                 )
 
     def select_competence(self, competence_id, target=None):
-        if self.action_en_cours:
-            return
         perso_dict = self.get_perso_tour()
-        self.jeu.equipe.get_personnage(perso_dict["nom"]).utiliser_competence(competence_id, target)
-        self.action_en_cours = True
+        if target is None:
+            target = [self.personnages, self.ennemis]
+        classe_personnage = self.jeu.equipe.get_personnage(perso_dict["nom"])
+        competence = classe_personnage.competences[competence_id]
+        if competence["cost"]["pa"] > perso_dict["pa"]:
+            return
+        if "mitigation" in competence["cost"]:
+            niveau_effet = perso_dict["effets"].get("mitigation", (0, 0))[0]
+            if niveau_effet < competence["cost"]["mitigation"]:
+                return
+            else:
+                perso_dict["effets"]["mitigation"][1] -= 1
+                if perso_dict["effets"]["mitigation"][1] <= 0:
+                    del perso_dict["effets"]["mitigation"]
+        if "elan" in competence["cost"]:
+            niveau_effet = perso_dict["effets"].get("elan", (0, 0))[0]
+            if niveau_effet < competence["cost"]["elan"]:
+                return
+            else:
+                perso_dict["effets"]["elan"][1] -= 1
+                if perso_dict["effets"]["elan"][1] <= 0:
+                    del perso_dict["effets"]["elan"]
+        classe_personnage.utiliser_competence(competence_id, perso_dict, target)
         self.prochain_tour()
 
     def on_hit(self, attacker, target):
-        degats = self.calcul_degats(attacker, target)
-        target["vie"] -= degats
+        degats = calcul_degats(attacker, target)
+        target["attributs"]["vie"] -= degats
 
     def update(self, events):
 
@@ -364,7 +404,7 @@ class Combat(Action):
 
         ennemi_vivants = False
         for ennemi in self.ennemis:
-            if ennemi["vie"] > 0:
+            if ennemi["attributs"]["vie"] > 0:
                 ennemi_vivants = True
                 break
 
@@ -380,8 +420,10 @@ class Combat(Action):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
+                    son_selection.play()
                     self.selection = (self.selection + 1) % len(self.options)
                 elif event.key == pygame.K_UP:
+                    son_selection.play()
                     self.selection = (self.selection - 1) % len(self.options)
         if self.tour[0] == "personnage":
             if self.action == "selection":
@@ -395,8 +437,32 @@ class Combat(Action):
 
     # AFFICHAGE
 
+    def est_timing_parry(self, window):
+        """
+        Vérifie si le timing pour parer est bon.
+        L'attaque doit avoir des positions x, y définies (soit prédéfinies, soit auto-générées).
+        """
+        window_end = window["w_end"]
+        window_start = window["w_start"]
+        current_frame = self.sub_frame_count
+
+        total_frames = window_end - window_start
+        if total_frames <= 0:
+            return False
+
+        # Calculer la progression de l'indicateur (0.0 à 1.0)
+        progress = (current_frame - window_start) / total_frames
+        progress = max(0, min(1, progress))  # Limiter entre 0 et 1
+
+        # Périmètre total du carré (4 côtés de 50 pixels)
+        indicator_pos = progress * (4 * 50)
+
+        # La zone dorée est le côté gauche (de 150 à 200 du périmètre)
+        return 150 <= indicator_pos <= 200
+
     def draw_qte(self, window):
-        pos = [500, 350]
+        # Utiliser la position prédéfinie dans l'attaque, ou utiliser une position par défaut
+        pos = [window.get("pos_x", 500), window.get("pos_y", 350)]
         is_focused = window.get("focus", False)
         window_end = window["w_end"]
         window_start = window["w_start"]
@@ -436,7 +502,7 @@ class Combat(Action):
         pygame.draw.line(self.jeu.ui_surface, (245, 205, 0), (pos[0] - 25, pos[1] - 25), (pos[0] - 25, pos[1] + 25), 3)
 
         # Dessiner l'indicateur
-        pygame.draw.circle(self.jeu.ui_surface, (0, 0, 0), (int(indicator_x), int(indicator_y)),
+        pygame.draw.circle(self.jeu.ui_surface, (245, 205, 0), (int(indicator_x), int(indicator_y)),
                            3)
 
     def draw_selection(self, options):
@@ -549,7 +615,7 @@ class Combat(Action):
 
         elif self.menu_actuel == "attaque":
 
-            ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
+            ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["attributs"]["vie"] > 0]
             self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
 
         elif self.menu_actuel == "items":
@@ -595,8 +661,25 @@ class Combat(Action):
 
         elif self.menu_actuel == "cible_ennemi":
 
-            ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["vie"] > 0]
+            ennemis_vivants = [ennemi for ennemi in self.ennemis if ennemi["attributs"]["vie"] > 0]
             self.draw_selection([ennemi["nom"] for ennemi in ennemis_vivants])
+
+    def draw_health_bar(self, x, y, vie, vie_max, width=100, height=8):
+        """Dessine une barre de vie à la position donnée"""
+        ratio_vie = max(0, vie / vie_max) if vie_max > 0 else 0
+
+        # Fond noir
+        pygame.draw.rect(self.jeu.ui_surface, (0, 0, 0), (x - width // 2, y, width + 2, height + 2))
+
+        # Barre de vie (couleur dégradée selon la santé)
+        if ratio_vie > 0.5:
+            color = (0, 255, 0)  # Vert
+        elif ratio_vie > 0.25:
+            color = (255, 165, 0)  # Orange
+        else:
+            color = (255, 0, 0)  # Rouge
+
+        pygame.draw.rect(self.jeu.ui_surface, color, (x - width // 2 + 1, y + 1, width * ratio_vie, height))
 
     def draw_ui(self):
         # menu
@@ -610,16 +693,34 @@ class Combat(Action):
     def draw(self):
 
         self.draw_ui()
+
+        # Dessiner les personnages et leurs barres de vie
         for perso in self.personnages:
             perso_obj = self.jeu.equipe.get_personnage(perso["nom"])
             if perso_obj:
                 perso_obj.draw()
+                # Dessiner la barre de vie sous le personnage
+                vie = perso["attributs"]["vie"]
+                vie_max = perso["attributs"]["vie_max"]
+                # Position sous le personnage
+                bar_x = perso_obj.rect.centerx
+                bar_y = perso_obj.rect.bottom + 5
+                self.draw_health_bar(bar_x, bar_y, vie, vie_max, width=80, height=6)
 
-        for i, ennemi in enumerate(self.ennemis):
-            ratio_vie = ennemi["vie"] / ennemi["vie_depart"]
-            pygame.draw.line(self.jeu.ui_surface, (0, 0, 0), (10, i * 25 + 10), (990, i * 25 + 10), width=6)
-            pygame.draw.line(self.jeu.ui_surface, (255, 0, 0), (10, i * 25 + 10), (990 * ratio_vie, i * 25 + 10),
-                             width=6)
+        # Dessiner les ennemis et leurs barres de vie
+        for ennemi in self.ennemis:
+            # Calculer la barre de vie de l'ennemi
+            vie = ennemi["attributs"]["vie"]
+            vie_depart = ennemi["vie_depart"]
+
+            # Chercher l'objet ennemi pour obtenir sa position
+            # Les ennemis sont généralement affichés en haut de l'écran
+            # On peut utiliser leur index pour positionner les barres
+            ennemi_index = self.ennemis.index(ennemi)
+            bar_x = 500 + ennemi_index * 200  # Position horizontale
+            bar_y = 50 + ennemi_index * 30  # Position verticale
+
+            self.draw_health_bar(bar_x, bar_y, vie, vie_depart, width=120, height=8)
 
         perso_tour = self.get_perso_tour()
         if perso_tour and perso_tour.get("attacking", False):
