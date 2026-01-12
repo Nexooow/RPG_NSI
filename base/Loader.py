@@ -140,8 +140,8 @@ class Loader:
                     if "interaction" in content and content["interaction"]:
                         self.creer_sequence(f"{identifiant}:interaction", content["interaction"], "action")
                         print(f"JSONLoader | NPC | {identifiant} > action d'interaction créer")
-                    
-            except Exception:
+            except Exception as e:
+                print(f"Impossible de charger le NPC '{file}': {e}")
                 continue
 
     def get_sequence(self, sequence_id: str):
@@ -151,6 +151,8 @@ class Loader:
             return None
 
     def creer_action(self, data: dict) -> typing.Optional[Action]:
+        assert isinstance(data, dict)
+        assert "type" in data
         try:
             return actions_par_type[data["type"]](self.parent, data)  # instancie l'action correspondante
         except KeyError:
@@ -158,7 +160,7 @@ class Loader:
             return None
 
     def tirer_action(self, chance: int) -> typing.Optional[str]:
-        evenement = random() * 100 <= 15
+        evenement = random() * 100 <= 7
         if evenement:
             if randint(0, 100) <= chance:
                 key = self.actions_types["event-positif"][

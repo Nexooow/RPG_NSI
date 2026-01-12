@@ -37,9 +37,11 @@ player = Fighter(500, 480, [162, 1, [72, 56]], player_sheet, [10, 8, 1, 7, 7, 3,
 
 class Radahn(Action):
     def __init__(self, jeu, _):
+    def __init__(self, jeu, _):
         super().__init__(jeu)
         self.start_time = None
         self.desactive_ui = True
+        self.utilise_musique = True
         self.utilise_musique = True
         self.radahn_frame_index = 0
         self.explosion_group = pygame.sprite.Group()
@@ -48,6 +50,7 @@ class Radahn(Action):
     def executer(self):
         self.start_time = time()
         self.radahn_frame_index = 0
+        self.jeu.jouer_musique("survive", loop=False)
         self.jeu.jouer_musique("survive", loop=False)
 
     def update(self, events):
@@ -82,6 +85,7 @@ class Radahn(Action):
         player.update()
         player.draw(self.jeu.fond)
 
+
         self.explosion_group.draw(self.jeu.fond)
         self.explosion_group.update()
 
@@ -104,6 +108,12 @@ class Radahn(Action):
             )
         if player.health <= 0:
             text_render_centered(self.jeu.ui_surface, "GIT GUD", "extrabold", color=(255, 0, 0), pos=(500, 350))
+            # Téléporter l'équipe à l'auberge et soigner
+            self.jeu.region = "Auberge"
+            self.jeu.lieu = self.jeu.regions["Auberge"].entree
+            self.jeu.equipe.soigner_complet()
+            self.jeu.actions.contenu = []
+            self.complete = True
             # Téléporter l'équipe à l'auberge et soigner
             self.jeu.region = "Auberge"
             self.jeu.lieu = self.jeu.regions["Auberge"].entree

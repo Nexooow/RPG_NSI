@@ -11,6 +11,8 @@ aretes = [
     ("Auberge", "Elder Tree", 25),
     ("Elder Tree", "Auberge", 25),
     ("Auberge", "Ceilidh", 34),
+    ("Elder Tree", "Auberge", 12),
+    ("Elder Tree", "Mountain", 22),
     ("Auberge", "Dawn of the world", 19),
     ("Dawn of the world", "Auberge", 19),
 ]
