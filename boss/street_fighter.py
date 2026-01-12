@@ -59,11 +59,16 @@ class StreetFighter(Action):
         self.draw_health(self.player.health, 20, 20)
         self.draw_health(self.demiurge.health, 500, 20)
         self.demiurge.draw(self.jeu.fond)
+        self.demiurge.draw_fireballs(self.jeu.fond)
+        self.player.draw(self.jeu.fond)
 
     def update(self, events):
         self.player.move(1000, 700, self.jeu.fond, self.demiurge)
         self.demiurge.move(1000, 700, self.jeu.fond, self.player, False)
+        self.player.update(self.demiurge)
+        self.demiurge.update(self.player)
         self.demiurge.ai_behavior(self.jeu.fond, self.player)
+        self.demiurge.update_fireballs(self.player)
         if not self.demiurge.alive and self.demiurge.frame_index==len(self.demiurge.animation_list[6])-1:
             self.jeu.variables_jeu['demiurge_killed']=True
             self.complete=True

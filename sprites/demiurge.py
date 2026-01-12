@@ -141,11 +141,11 @@ class Fighter:
                 self.frame_index = 0
                 if self.action == 3 or self.action == 4:
                     self.attacking = False
-                    #self.attack_cooldown = 20
+                    self.attack_cooldown = 20
                 if self.action == 5:
                     self.hit = False
                     self.attacking = False
-                    #self.attack_cooldown = 20
+                    self.attack_cooldown = 20
         if self.attacking and not self.has_hit:
             if self.frame_index in self.attack_frame[self.attack_type]:
                 self.apply_attack(target)
@@ -183,13 +183,7 @@ class Fighter:
                     self.angry = False
 
                     self.anger_timer = 0
-                for fireball in self.fireballs:
-                    fireball.update()
-                    fireball.move()
-                    fireball.collision(player)
-                    fireball.draw(surface)
-                    if fireball.rect.right < 0 or fireball.rect.left > 1000 or fireball.has_hit:
-                        self.fireballs.remove(fireball)
+                
             else:
 
                 if self.attack_cooldown == 0:
@@ -213,13 +207,22 @@ class Fighter:
                         self.attack_cooldown = 20
                 else:
                     self.attack_cooldown -= 1
+    def update_fireballs(self, player):
+        for fireball in self.fireballs[:]:
+            fireball.update()
+            fireball.move()
+            fireball.collision(player)
+            if fireball.rect.right < 0 or fireball.rect.left > 1000 or fireball.has_hit:
+                self.fireballs.remove(fireball)
 
+    def draw_fireballs(self, surface):
+        for fireball in self.fireballs:
+            fireball.draw(surface)
     def attack(self, surface, target=None):
         
         self.attacking = True
         self.has_hit = False
-        self.attack_cooldown = 0
-
+       
     def update_action(self, new_action):
         if new_action != self.action:
             self.action = new_action
